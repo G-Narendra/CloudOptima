@@ -15,7 +15,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="CloudOptima",
-    page_icon=":material/cloud:",
+    page_icon="☁️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -163,8 +163,8 @@ def render_sidebar():
     with st.sidebar:
         st.markdown(
             "<div style='text-align:center; padding: 1rem 0;'>"
-            "<span style='font-size: 2.2rem;'>:material/cloud:</span>"
-            "<h3 style='margin: 0.3rem 0 0 0; color: #E8E8F0;'>CloudOptima</h3>"
+            "<h2 style='margin: 0; color: #E8E8F0; font-size: 1.5rem;'>"
+            "CloudOptima</h2>"
             "<p style='color: #888; font-size: 0.8rem; margin: 0;'>"
             "Multi-Agent Cloud Architect"
             "</p></div>",
@@ -665,12 +665,12 @@ def render_results(result: dict):
                     st.code(content[:3000], language=lang)
 
 
-def _format_agent_output_human_readable(output: dict) -> str:
+def _format_agent_output_human_readable(output: dict) -> str | None:
     """Format agent output as human-readable text instead of raw JSON.
     
     Extracts key findings from the structured output and presents them
-    in a clear, readable format. Falls back to truncated JSON only
-    when parsing is not possible.
+    in a clear, readable format. When parsing fails, returns a friendly
+    message explaining the situation rather than dumping raw code.
     """
     if not output:
         return "<em>No output available</em>"
@@ -684,13 +684,19 @@ def _format_agent_output_human_readable(output: dict) -> str:
             match = re.search(r'\{.*\}', raw_text, re.DOTALL)
             if match:
                 parsed = json.loads(match.group())
-                # Recursively format the parsed output
                 return _format_agent_output_human_readable(parsed)
         except (json.JSONDecodeError, AttributeError):
             pass
-        # Show truncated raw text with clear label
-        snippet = raw_text[:400]
-        return f"<div style='color: #aaa; font-size: 0.85rem;'><strong>Analysis output:</strong><br><code>{snippet}</code></div>"
+        # If we can't parse it, show a helpful summary instead of raw code
+        # Extract any readable sentences from the raw text
+        readable_parts = []
+        for line in raw_text.replace('```json', '').replace('```', '').split('\n'):
+            stripped = line.strip()
+            if stripped and len(stripped) > 20 and '"' not in stripped[:3]:
+                readable_parts.append(stripped)
+        if readable_parts:
+            return "<br>".join(readable_parts[:5])
+        return "<em>Agent output available in JSON view below</em>"
     
     if "_error" in output or "error" in output:
         err = output.get("_error", output.get("error", "Unknown error"))
@@ -762,12 +768,12 @@ def main():
     # Hero header
     st.markdown(
         "<div style='text-align: center; padding: 1.5rem 0 0.5rem 0;'>"
-        "<span style='font-size: 3rem;'>:material/cloud:</span>"
-        "<h1 style='margin: 0.3rem 0 0 0; font-size: 2.2rem; "
+        "<div style='margin: 0.5rem 0;'>"
+        "<h1 style='margin: 0; font-size: 2.5rem; "
         "background: linear-gradient(135deg, #6C5CE7, #a29bfe); "
         "-webkit-background-clip: text; -webkit-text-fill-color: transparent; "
         "background-clip: text;'>"
-        "CloudOptima</h1>"
+        "CloudOptima</h1></div>"
         "<p style='color: #888; max-width: 600px; margin: 0.3rem auto 0 auto;'>"
         "Describe your infrastructure needs below. Five AI specialists will "
         "analyze, debate, and deliver a complete cloud architecture with "

@@ -17,7 +17,7 @@ from src.core.models import (
 )
 from src.core.agent_base import BaseAgent
 from src.core.observability import get_tracer, get_audit_logger, TraceEvent, TraceEventType
-from src.core.agent_schemas import validate_agent_output, extract_conflicts_from_validated
+from src.core.agent_schemas import validate_agent_output, extract_conflicts_from_validated, extract_json_from_llm_output
 
 logger = logging.getLogger(__name__)
 
@@ -548,7 +548,7 @@ param tags object = {{
 
 // Resource group for the architecture
 resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {{
-    name: 'rg-architect-panel-${{uniqueString(resourceGroup().id)}}'
+    name: 'rg-cloudoptima-${{uniqueString(resourceGroup().id)}}'
     location: location
     tags: tags
 }}
@@ -735,10 +735,13 @@ output "architecture_json" {{
             if t.duration_ms:
                 agent_timing[t.agent_type.value] = {"duration_ms": t.duration_ms, "status": t.status}
             if t.status == "completed" and t.output_text:
+                # Strip code fences before parsing so JSON output renders properly
+                clean_json = extract_json_from_llm_output(t.output_text)
                 try:
-                    agent_outputs[t.agent_type.value] = json.loads(t.output_text)
+                    agent_outputs[t.agent_type.value] = json.loads(clean_json)
                 except json.JSONDecodeError:
-                    agent_outputs[t.agent_type.value] = {"raw": t.output_text[:500]}
+                    # Store full output for expander view, not truncated
+                    agent_outputs[t.agent_type.value] = {"raw": t.output_text}
             else:
                 agent_outputs[t.agent_type.value] = {"error": t.error or "No output"}
 

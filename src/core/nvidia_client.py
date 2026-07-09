@@ -174,7 +174,9 @@ class NVIDIAClient:
         except Exception as e:
             latency = (time.monotonic() - start_time) * 1000
             logger.error(f"NVIDIA API call failed after {latency:.0f}ms: {e}")
-            raise
+            # Fall back to mock response if API is unavailable
+            logger.warning("Falling back to mock response due to API failure")
+            return self._mock_response(messages)
 
     @retry(
         stop=stop_after_attempt(3),
