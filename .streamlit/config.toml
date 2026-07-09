@@ -1,0 +1,14 @@
+[theme]
+# Professional dark-inspired theme
+primaryColor = "#6C5CE7"
+backgroundColor = "#0F0F1A"
+secondaryBackgroundColor = "#1A1A2E"
+textColor = "#E8E8F0"
+font = "sans serif"
+
+[server]
+maxUploadSize = 10
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false

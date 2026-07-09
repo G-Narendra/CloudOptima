@@ -1,0 +1,37 @@
+# The AI Architect Panel - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core
+openai>=1.0.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-dotenv>=1.0.0
+
+# API
+fastapi>=0.100.0
+uvicorn>=0.23.0
+
+# IaC Generation
+jinja2>=3.1.0
+
+# CLI & Demo
+rich>=13.0.0
+typer>=0.9.0
+
+# Dashboard
+streamlit>=1.28.0
+
+# RAG for Compliance
+chromadb>=1.5.0
+sentence-transformers>=2.2.0
+
+# Monitoring & Error Tracking
+sentry-sdk>=2.0.0
+
+# Utilities
+httpx>=0.25.0
+tenacity>=8.2.0  # for retry logic on API rate limits
+
+# Testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0

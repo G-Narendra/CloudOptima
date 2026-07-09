@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment files
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project
+*.log
+.freebuff/qa-reports/
+.freebuff/security-reports/
+.freebuff/compliance_db/
+.freebuff/traces/
+.freebuff/audit/
+.freebuff/llm_cache.json
+
+# Windows reserved device names
+nul
+con
+prn
+lpt1
+com1
+
+# Generated artifacts
+coverage.xml
+.freebuff/context/

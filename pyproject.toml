@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "ai-architect-panel"
+version = "1.0.0"
+description = "Five AI specialists analyze, debate, and deliver production-grade cloud architectures"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "AI Architect Panel Team"},
+]
+keywords = ["ai", "cloud", "azure", "multi-agent", "architecture"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_unimported = false
+disallow_subclassing_any = false
+ignore_missing_imports = true
+no_implicit_optional = true
+warn_return_any = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = [
+    "streamlit",
+    "openai",
+    "httpx",
+    "tenacity",
+    "sentry_sdk",
+    "chromadb",
+    "sentence_transformers",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning:sentry_sdk",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/test_*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "except Exception:",
+    "except:",
+]
+
+[tool.setuptools.packages.find]
+include = ["src*"]
