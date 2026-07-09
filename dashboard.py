@@ -402,7 +402,7 @@ async def run_session_with_progress(prompt: str, region: str) -> dict:
         duration_s = info["duration_ms"] / 1000
         status = info["status"]
         is_ok = status == "completed"
-        icon = ":material/check_circle:" if is_ok else ":material/error:"
+        icon = "✅" if is_ok else "❌"
 
         status_containers[agent_key].markdown(
             f"<span style='color: {config['color']}; font-size: 1.2rem;'>{icon}</span>",
@@ -423,12 +423,12 @@ async def run_session_with_progress(prompt: str, region: str) -> dict:
             text=f"{config['label']} — {duration_s:.1f}s ({len(done_set)}/{len(specialist_keys)})",
         )
 
-        st.toast(f":material/check_circle: {config['label']} completed in {duration_s:.1f}s")
+        st.toast(f"✅ {config['label']} completed in {duration_s:.1f}s")
 
     def on_judge_done(conflict_count: int):
         judge_status.markdown(
             f"<span style='color: #10B981; font-weight: 500;'>"
-            f":material/check_circle: Arbitrated — {conflict_count} conflict{'s' if conflict_count != 1 else ''} resolved"
+            f"✅ Arbitrated — {conflict_count} conflict{'s' if conflict_count != 1 else ''} resolved"
             f"</span>",
             unsafe_allow_html=True,
         )
@@ -498,7 +498,7 @@ def render_results(result: dict):
     st.markdown(
         f"<div style='background: linear-gradient(135deg, #6C5CE7, #a29bfe); "
         f"border-radius: 12px; padding: 1.5rem 2rem; margin: 1.5rem 0;'>"
-        f"<h2 style='color: white; margin: 0;'>:material/check_circle: Analysis complete</h2>"
+        f"<h2 style='color: white; margin: 0;'>✅ Analysis complete</h2>"
         f"<p style='color: rgba(255,255,255,0.8); margin: 0.3rem 0 0 0;'>"
         f"Session {result['session_id']} — {total_s:.1f}s — {len(result['conflicts'])} conflicts resolved"
         f"</p></div>",
