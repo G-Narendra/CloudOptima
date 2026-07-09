@@ -505,23 +505,22 @@ def render_results(result: dict):
         unsafe_allow_html=True,
     )
 
-    KPI_COLS = st.columns(4, gap="medium")
-    kpis = [
-        (":material/timer:", "Total time", f"{total_s:.1f}s"),
-        (":material/search:", "Conflicts", str(len(result["conflicts"]))),
-        (":material/inventory:", "Artifacts", str(len(result["artifacts"]))),
-        (":material/check_circle:", "Status",
-         "Approved" if result.get("arbitration") else "Pending"),
+    kpi_cols = st.columns(4, gap="medium")
+    kpi_data = [
+        ("Total time", f"{total_s:.1f}s"),
+        ("Conflicts", str(len(result["conflicts"]))),
+        ("Artifacts", str(len(result["artifacts"]))),
+        ("Status", "Approved" if result.get("arbitration") else "Pending"),
     ]
-    for col, (icon, label, value) in zip(KPI_COLS, kpis):
+    for col, (label, value) in zip(kpi_cols, kpi_data):
         with col:
             st.markdown(
                 f"<div style='background: var(--secondary-background-color); "
                 f"border-radius: 10px; padding: 0.8rem; text-align: center; "
                 f"border: 1px solid rgba(255,255,255,0.05);'>"
-                f"<div style='font-size: 1.5rem; margin-bottom: 0.3rem;'>{icon}</div>"
-                f"<div style='color: #888; font-size: 0.75rem;'>{label}</div>"
-                f"<div style='font-size: 1.4rem; font-weight: 600;'>{value}</div>"
+                f"<div style='color: #888; font-size: 0.7rem; text-transform: uppercase; "
+                f"letter-spacing: 1px;'>{label}</div>"
+                f"<div style='font-size: 1.5rem; font-weight: 700; margin-top: 0.2rem;'>{value}</div>"
                 f"</div>",
                 unsafe_allow_html=True,
             )

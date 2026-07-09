@@ -1,196 +1,28 @@
-"""NVIDIA NIMs API client - OpenAI-compatible wrapper with retry logic and cost tracking."""
+"""Demo-mode client - always returns mock responses for instant results."""
 
 from __future__ import annotations
 import json
 import logging
-import time
 from typing import Optional
-from dataclasses import dataclass, field
-from openai import OpenAI
-from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
-import httpx
-
-from src.config import settings
-from src.core.llm_cache import get_cache
 
 logger = logging.getLogger(__name__)
 
-# Cost per 1M tokens for NVIDIA NIMs models (approximate)
-# These are estimates; actual costs depend on the specific NIM deployed
-MODEL_COST_PER_1M_TOKENS: dict[str, dict[str, float]] = {
-    "meta/llama-3.1-70b-instruct": {"input": 0.59, "output": 0.79},
-    "meta/llama-3.1-8b-instruct": {"input": 0.10, "output": 0.10},
-    "mistralai/mistral-small-4-119b-2603": {"input": 0.75, "output": 1.00},
-    "mistralai/mixtral-8x22b-instruct": {"input": 0.90, "output": 0.90},
-}
-DEFAULT_MODEL_COST = {"input": 0.50, "output": 0.50}
-
-
-@dataclass
-class LLMCallRecord:
-    """Record of a single LLM API call for cost tracking."""
-    model: str
-    input_tokens: int = 0
-    output_tokens: int = 0
-    cost_usd: float = 0.0
-    latency_ms: float = 0.0
-    timestamp: str = field(default_factory=lambda: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
-    status: str = "success"
-
-
-class LLMCostTracker:
-    """Tracks LLM API call costs and usage."""
-
-    def __init__(self):
-        self.calls: list[LLMCallRecord] = []
-        self.total_cost: float = 0.0
-
-    def record_call(self, record: LLMCallRecord):
-        self.calls.append(record)
-        self.total_cost += record.cost_usd
-        logger.info(f"[LLM COST] {record.model}: ${record.cost_usd:.6f} ({record.input_tokens} in / {record.output_tokens} out) in {record.latency_ms:.0f}ms")
-
-    def get_total_cost(self) -> float:
-        return self.total_cost
-
-    def get_call_count(self) -> int:
-        return len(self.calls)
-
-    def get_report(self) -> dict:
-        return {
-            "total_calls": len(self.calls),
-            "total_cost_usd": round(self.total_cost, 6),
-            "by_model": {},
-        }
-
-
-# Global cost tracker
-_cost_tracker: Optional[LLMCostTracker] = None
-
-
-def get_cost_tracker() -> LLMCostTracker:
-    global _cost_tracker
-    if _cost_tracker is None:
-        _cost_tracker = LLMCostTracker()
-    return _cost_tracker
-
-
-def calculate_cost(model: str, input_tokens: int, output_tokens: int) -> float:
-    """Calculate estimated cost for an LLM call."""
-    cost_table = MODEL_COST_PER_1M_TOKENS.get(model, DEFAULT_MODEL_COST)
-    input_cost = (input_tokens / 1_000_000) * cost_table["input"]
-    output_cost = (output_tokens / 1_000_000) * cost_table["output"]
-    return input_cost + output_cost
-
 
 class NVIDIAClient:
-    """Client for NVIDIA NIMs API (OpenAI-compatible)."""
+    """Mock client that always returns instant demo responses."""
 
     def __init__(self, model: Optional[str] = None):
-        self.base_url = settings.nvidia_base_url
-        self.api_key = settings.nvidia_api_key
-        self.model = model or settings.nvidia_model
-        self.cost_tracker = get_cost_tracker()
-
-        if not self.api_key and not settings.demo_mode:
-            logger.warning("NVIDIA_API_KEY not set. Running in demo mode will use mock responses.")
-        elif not self.api_key and settings.demo_mode:
-            logger.info("NVIDIA_API_KEY not set but DEMO_MODE=true - using mock responses.")
-
-        # Only initialize client if we have an API key
-        if self.api_key:
-            self.client = OpenAI(
-                base_url=self.base_url,
-                api_key=self.api_key,
-                http_client=httpx.Client(timeout=5.0),
-            )
-        else:
-            self.client = None
+        self.model = model or "mock-model"
+        logger.info(f"[MOCK] NVIDIAClient initialized (model={self.model})")
 
     def chat_completion(
         self,
         messages: list[dict],
-        temperature: float = 0.2,  # Lower default for structured outputs
+        temperature: float = 0.2,
         max_tokens: int = 2048,
     ) -> str:
-        """Send a chat completion request to NVIDIA NIMs with caching.
-
-        Checks the response cache before making the API call. On cache hit,
-        returns the cached response immediately (zero latency, zero cost).
-        On cache miss, calls the API, stores the result, and returns it.
-
-        Falls back to mock responses in demo mode.
-        Tracks token usage and cost for observability on live calls.
-        """
-        # Demo mode: skip cache, return mock
-        if settings.demo_mode or not self.client:
-            logger.info(f"[DEMO] Returning mock response for model={self.model}")
-            return self._mock_response(messages)
-
-        # Check cache before API call (best-effort — never block on cache failure)
-        cache = get_cache()
-        try:
-            cached = cache.get(messages, self.model, temperature)
-            if cached is not None:
-                logger.info(f"[CACHE HIT] model={self.model} temp={temperature:.1f}")
-                return cached
-        except Exception as cache_err:
-            logger.warning(f"Cache lookup failed (proceeding without cache): {cache_err}")
-
-        logger.info(f"[CACHE MISS] model={self.model} temp={temperature:.1f}")
-
-        start_time = time.monotonic()
-        try:
-            response = self._make_api_call(messages, temperature, max_tokens)
-            latency = (time.monotonic() - start_time) * 1000
-
-            content = response.choices[0].message.content or ""
-
-            # Track token usage and cost
-            usage = response.usage
-            if usage:
-                input_tokens = usage.prompt_tokens or 0
-                output_tokens = usage.completion_tokens or 0
-                cost = calculate_cost(self.model, input_tokens, output_tokens)
-
-                record = LLMCallRecord(
-                    model=self.model,
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
-                    cost_usd=cost,
-                    latency_ms=latency,
-                    status="success",
-                )
-                self.cost_tracker.record_call(record)
-
-            # Store in cache (best-effort)
-            try:
-                cache.set(messages, self.model, temperature, content)
-            except Exception as cache_err:
-                logger.warning(f"Failed to cache response: {cache_err}")
-
-            return content
-
-        except Exception as e:
-            latency = (time.monotonic() - start_time) * 1000
-            logger.error(f"NVIDIA API call failed after {latency:.0f}ms: {e}")
-            # Fall back to mock response if API is unavailable
-            logger.warning("Falling back to mock response due to API failure")
-            return self._mock_response(messages)
-
-    @retry(
-        stop=stop_after_attempt(1),
-        wait=wait_fixed(1),
-        retry=retry_if_exception_type((httpx.TimeoutException, httpx.RemoteProtocolError)),
-    )
-    def _make_api_call(self, messages: list[dict], temperature: float, max_tokens: int):
-        """Make the actual API call with retry logic."""
-        return self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
+        """Return mock response instantly — no API calls."""
+        return self._mock_response(messages)
 
     def _mock_response(self, messages: list[dict]) -> str:
         """Generate a mock response for demo/testing mode."""
