@@ -535,10 +535,9 @@ class Orchestrator:
 
         bicep = f"""// CloudOptima - Generated Bicep Template
 // Session: {arb.session_id}
+// Generated: CloudOptima Multi-Agent Architecture Analysis
 // WARNING: This is a template. Review and customize before deployment.
 // Human approval is required before applying to any subscription.
-
-// {arb.final_recommendation[:500]}
 
 param location string = resourceGroup().location
 param tags object = {{
@@ -565,10 +564,9 @@ output architectureJson string = '{architecture_json}'
 
         terraform = f"""# CloudOptima - Generated Terraform Configuration
 # Session: {arb.session_id}
+# Generated: CloudOptima Multi-Agent Architecture Analysis
 # WARNING: This is a template. Review and customize before deployment.
 # Human approval is required before applying to any subscription.
-
-# {arb.final_recommendation[:500]}
 
 terraform {{
   required_providers {{

@@ -160,31 +160,29 @@ class TestAssemblePrompt:
 class TestGetSummary:
     """Test _get_summary logic from dashboard.py."""
 
-    def _format_raw_output(self, output: dict) -> str | None:
-        """Format raw/error output - mirrors dashboard._format_agent_output_human_readable."""
+    def _get_summary(self, agent_type: str, output: dict) -> str:
+        """Replicate _get_summary from dashboard.py for isolated testing."""
         if not output:
             return "<em>No output available</em>"
-        if "raw" in output:
-            raw_text = output["raw"]
-            try:
-                import re
-                match = re.search(r'\{.*\}', raw_text, re.DOTALL)
-                if match:
-                    parsed = json.loads(match.group())
-                    return self._get_summary("architect", parsed)  # Try to extract
-            except (json.JSONDecodeError, AttributeError):
-                pass
-            return f"<div style='color: #aaa; font-size: 0.85rem;'><strong>Analysis output:</strong><br><code>{raw_text[:400]}</code></div>"
+        
         if "_error" in output or "error" in output:
             err = output.get("_error", output.get("error", "Unknown error"))
             return f"<div style='color: #EF4444;'>⚠️ {err}</div>"
-        return None
-
-    def _get_summary(self, agent_type: str, output: dict) -> str:
-        """Replicate _get_summary from dashboard.py for isolated testing."""
-        formatted = self._format_raw_output(output)
-        if formatted is not None:
-            return formatted
+        
+        if "raw" in output:
+            import re
+            raw_text = output["raw"]
+            match = re.search(r'\{.*\}', raw_text, re.DOTALL)
+            if match:
+                try:
+                    parsed = json.loads(match.group())
+                    output = parsed
+                except (json.JSONDecodeError, AttributeError):
+                    lines = [l.strip() for l in raw_text.replace('```json', '').replace('```', '').split('\n')]
+                    readable = [l for l in lines if l and len(l) > 30 and '"' not in l[:3]]
+                    if readable:
+                        return "<br>".join(readable[:5])
+                    return "<em>Agent output available in JSON view below</em>"
 
         if agent_type == "architect" and "architecture" in output:
             arch = output["architecture"]

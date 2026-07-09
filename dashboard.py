@@ -665,52 +665,37 @@ def render_results(result: dict):
                     st.code(content[:3000], language=lang)
 
 
-def _format_agent_output_human_readable(output: dict) -> str | None:
-    """Format agent output as human-readable text instead of raw JSON.
-    
-    Extracts key findings from the structured output and presents them
-    in a clear, readable format. When parsing fails, returns a friendly
-    message explaining the situation rather than dumping raw code.
+def _get_summary(agent_type: str, output: dict) -> str:
+    """Extract a concise human-readable summary from agent output.
+
+    First attempts to extract JSON from raw output (code fences, truncated text).
+    Then formats structured content (architecture, costs, security, compliance)
+    into human-readable text with icons and color coding.
     """
     if not output:
         return "<em>No output available</em>"
     
-    # Handle raw/error responses from failed JSON parsing
-    if "raw" in output:
-        raw_text = output["raw"]
-        # Try to extract JSON manually
-        try:
-            import re
-            match = re.search(r'\{.*\}', raw_text, re.DOTALL)
-            if match:
-                parsed = json.loads(match.group())
-                return _format_agent_output_human_readable(parsed)
-        except (json.JSONDecodeError, AttributeError):
-            pass
-        # If we can't parse it, show a helpful summary instead of raw code
-        # Extract any readable sentences from the raw text
-        readable_parts = []
-        for line in raw_text.replace('```json', '').replace('```', '').split('\n'):
-            stripped = line.strip()
-            if stripped and len(stripped) > 20 and '"' not in stripped[:3]:
-                readable_parts.append(stripped)
-        if readable_parts:
-            return "<br>".join(readable_parts[:5])
-        return "<em>Agent output available in JSON view below</em>"
-    
+    # Handle error responses
     if "_error" in output or "error" in output:
         err = output.get("_error", output.get("error", "Unknown error"))
         return f"<div style='color: #EF4444;'>⚠️ {err}</div>"
     
-    return None  # Signal to use the structured formatter instead
-
-
-def _get_summary(agent_type: str, output: dict) -> str:
-    """Extract a concise human-readable summary from agent output."""
-    # First try the human-readable formatter
-    formatted = _format_agent_output_human_readable(output)
-    if formatted is not None:
-        return formatted
+    # If output has raw text, try to extract and parse JSON, then use parsed dict
+    if "raw" in output:
+        import re
+        raw_text = output["raw"]
+        match = re.search(r'\{.*\}', raw_text, re.DOTALL)
+        if match:
+            try:
+                parsed = json.loads(match.group())
+                output = parsed  # Use parsed dict for structured formatting below
+            except (json.JSONDecodeError, AttributeError):
+                # Even with failed parse, try to show a readable snippet
+                lines = [l.strip() for l in raw_text.replace('```json', '').replace('```', '').split('\n')]
+                readable = [l for l in lines if l and len(l) > 30 and '"' not in l[:3]]
+                if readable:
+                    return "<br>".join(readable[:5])
+                return "<em>Agent output available in JSON view below</em>"
     
     # Structured formatting based on agent type
     if agent_type == "architect" and "architecture" in output:

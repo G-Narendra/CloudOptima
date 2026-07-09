@@ -7,7 +7,7 @@ import time
 from typing import Optional
 from dataclasses import dataclass, field
 from openai import OpenAI
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 import httpx
 
 from src.config import settings
@@ -179,8 +179,8 @@ class NVIDIAClient:
             return self._mock_response(messages)
 
     @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10),
+        stop=stop_after_attempt(1),
+        wait=wait_fixed(1),
         retry=retry_if_exception_type((httpx.TimeoutException, httpx.RemoteProtocolError)),
     )
     def _make_api_call(self, messages: list[dict], temperature: float, max_tokens: int):
