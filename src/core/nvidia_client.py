@@ -102,7 +102,7 @@ class NVIDIAClient:
             self.client = OpenAI(
                 base_url=self.base_url,
                 api_key=self.api_key,
-                http_client=httpx.Client(timeout=60.0),
+                http_client=httpx.Client(timeout=5.0),
             )
         else:
             self.client = None

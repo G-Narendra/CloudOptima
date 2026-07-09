@@ -666,84 +666,36 @@ def render_results(result: dict):
 
 
 def _get_summary(agent_type: str, output: dict) -> str:
-    """Extract a concise human-readable summary from agent output.
-
-    First attempts to extract JSON from raw output (code fences, truncated text).
-    Then formats structured content (architecture, costs, security, compliance)
-    into human-readable text with icons and color coding.
+    """Show agent output in a clean code block.
+    
+    Shows the raw JSON output directly so users can see the structured data.
+    Truncates to show key sections without overwhelming the UI.
     """
     if not output:
-        return "<em>No output available</em>"
+        return "<code>No output available</code>"
     
     # Handle error responses
     if "_error" in output or "error" in output:
         err = output.get("_error", output.get("error", "Unknown error"))
-        return f"<div style='color: #EF4444;'>⚠️ {err}</div>"
+        return f"<code style='color: #EF4444;'>Error: {err}</code>"
     
-    # If output has raw text, try to extract and parse JSON, then use parsed dict
-    if "raw" in output:
-        import re
-        raw_text = output["raw"]
-        match = re.search(r'\{.*\}', raw_text, re.DOTALL)
-        if match:
-            try:
-                parsed = json.loads(match.group())
-                output = parsed  # Use parsed dict for structured formatting below
-            except (json.JSONDecodeError, AttributeError):
-                # Even with failed parse, try to show a readable snippet
-                lines = [l.strip() for l in raw_text.replace('```json', '').replace('```', '').split('\n')]
-                readable = [l for l in lines if l and len(l) > 30 and '"' not in l[:3]]
-                if readable:
-                    return "<br>".join(readable[:5])
-                return "<em>Agent output available in JSON view below</em>"
+    # Show raw output as formatted JSON (this is what users prefer)
+    text = output.get("raw", "")
+    if text:
+        # Strip code fences for cleaner display
+        clean = text.replace('```json', '').replace('```', '').strip()
+        # Show first 1500 chars in a code block
+        display = clean[:1500]
+        if len(clean) > 1500:
+            display += "\n... (truncated, see full JSON below)"
+        return f"<pre style='font-size: 0.75rem; line-height: 1.4; color: #ccc; max-height: 300px; overflow-y: auto; white-space: pre-wrap;'>{display}</pre>"
     
-    # Structured formatting based on agent type
-    if agent_type == "architect" and "architecture" in output:
-        arch = output["architecture"]
-        parts = []
-        for key in ["compute", "storage", "networking", "data"]:
-            rec = arch.get(key, {}).get("recommendation", "")[:120]
-            if rec:
-                parts.append(f"<strong>{key.title()}:</strong> {rec}")
-        summary = output.get("summary", "")
-        if summary:
-            parts.append(f"<br><em>— {summary[:200]}</em>")
-        return "<br>".join(parts) if parts else json.dumps(output, indent=2)[:300]
-    elif agent_type == "cost" and "analysis" in output:
-        a = output["analysis"]
-        cost = a.get("estimated_monthly_cost", "N/A")
-        breakdown = a.get("cost_breakdown", {})
-        opts = a.get("cost_optimization_opportunities", [])
-        details = "<br>".join(f"<span style='color: #888;'>• {k}:</span> {v}" for k, v in list(breakdown.items())[:4])
-        savings = "<br>".join(
-            f"• {o.get('area', '')}: save {o.get('potential_savings', '')}"
-            for o in opts[:3]
-        )
-        return f"<strong>Estimated monthly cost:</strong> <span style='color: #F59E0B;'>{cost}</span><br>{details}<br><br><strong>Savings opportunities:</strong><br>{savings}"
-    elif agent_type == "security" and "security_assessment" in output:
-        s = output["security_assessment"]
-        risk = s.get("overall_risk_rating", "N/A")
-        risk_color = {"LOW": "#10B981", "MEDIUM": "#F59E0B", "HIGH": "#EF4444", "CRITICAL": "#DC2626"}.get(risk.upper(), "#888")
-        findings = s.get("findings", [])
-        items = []
-        for f in findings[:5]:
-            status = f.get("status", "")
-            icon = {"OK": "✅", "RECOMMENDATION": "ℹ️", "CONFIGURATION NEEDED": "⚠️", "CRITICAL GAP": "🚫"}.get(status, "•")
-            items.append(f"{icon} <strong>{f.get('control', '')}</strong>: {f.get('details', '')[:100]}")
-        findings_text = "<br>".join(items)
-        return f"<strong>Risk rating:</strong> <span style='color: {risk_color};'>{risk}</span><br><br>{findings_text}"
-    elif agent_type == "compliance" and "compliance_assessment" in output:
-        c = output["compliance_assessment"]
-        fw = ", ".join(c.get("applicable_frameworks", []))
-        findings = c.get("findings", [])
-        items = []
-        for f in findings[:4]:
-            status = f.get("status", "")
-            icon = {"OK": "✅", "POTENTIAL VIOLATION": "🚫", "NEEDS DESIGN CONSIDERATION": "⚠️", "NOT COVERED IN ARCHITECTURE": "📋"}.get(status, "•")
-            items.append(f"{icon} <strong>{f.get('framework', '')}</strong>: {f.get('requirement', '')[:120]}")
-        findings_text = "<br>".join(items)
-        return f"<strong>Applicable frameworks:</strong> {fw}<br><br>{findings_text}"
-    return json.dumps(output, indent=2)[:300]
+    # Structured output - show as JSON
+    try:
+        formatted = json.dumps(output, indent=2, default=str)[:1500]
+        return f"<pre style='font-size: 0.75rem; line-height: 1.4; color: #ccc; max-height: 300px; overflow-y: auto; white-space: pre-wrap;'>{formatted}</pre>"
+    except Exception:
+        return str(output)[:1500]
 
 
 # ─── Main ───────────────────────────────────────────────────────────────────
