@@ -1,4 +1,4 @@
-"""Input sanitization helpers for the AI Architect Panel.
+"""Input sanitization helpers for CloudOptima.
 
 Provides input validation, HTML escaping, and safe string handling
 to prevent XSS, injection, and data leakage through the dashboard.

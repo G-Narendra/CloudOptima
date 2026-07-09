@@ -1,5 +1,5 @@
 """
-The AI Architect Panel — Live Demo Dashboard
+CloudOptima — Multi-Agent Cloud Architecture Optimizer
 
 A production-grade Streamlit dashboard with live agent streaming,
 professional dark theme, and polished results display.
@@ -14,8 +14,8 @@ import json
 import streamlit as st
 
 st.set_page_config(
-    page_title="AI Architect Panel",
-    page_icon=":material/architecture:",
+    page_title="CloudOptima",
+    page_icon=":material/cloud:",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -163,10 +163,10 @@ def render_sidebar():
     with st.sidebar:
         st.markdown(
             "<div style='text-align:center; padding: 1rem 0;'>"
-            "<span style='font-size: 2.2rem;'>:material/architecture:</span>"
-            "<h3 style='margin: 0.3rem 0 0 0; color: #E8E8F0;'>AI Architect Panel</h3>"
+            "<span style='font-size: 2.2rem;'>:material/cloud:</span>"
+            "<h3 style='margin: 0.3rem 0 0 0; color: #E8E8F0;'>CloudOptima</h3>"
             "<p style='color: #888; font-size: 0.8rem; margin: 0;'>"
-            "Multi-Agent Cloud Designer"
+            "Multi-Agent Cloud Architect"
             "</p></div>",
             unsafe_allow_html=True,
         )
@@ -606,8 +606,9 @@ def render_results(result: dict):
     if result["conflicts"]:
         st.markdown("### :material/search: Detected conflicts")
         for i, conflict in enumerate(result["conflicts"]):
-            display_name = (conflict["dimension"].replace("_", " vs ").title()
-                            .replace(" Vs ", " vs "))
+            # Fix: 'architect_vs_cost' → 'Architect vs Cost'
+            parts = conflict["dimension"].split("_")
+            display_name = f"{parts[0].title()} vs {parts[2].title()}" if len(parts) >= 3 else conflict["dimension"].title()
             st.markdown(
                 f"<div style='background: var(--secondary-background-color); "
                 f"border-radius: 8px; padding: 0.8rem; margin: 0.5rem 0; "
@@ -630,47 +631,127 @@ def render_results(result: dict):
             "compliance_report": ":material/description:",
             "rationale": ":material/psychology:",
         }
+        artifact_labels = {
+            "iac": "IaC Templates",
+            "cost_forecast": "Cost Forecast",
+            "compliance_report": "Compliance Report",
+            "rationale": "Arbitration Rationale",
+        }
         tabs = st.tabs([
-            f"{artifact_icons.get(a['type'], ':material/article:')} {a['type'].title()}"
+            f"{artifact_icons.get(a['type'], ':material/article:')} {artifact_labels.get(a['type'], a['type'].title())}"
             for a in result["artifacts"]
         ])
         for tab, artifact in zip(tabs, result["artifacts"]):
             with tab:
-                st.markdown(f"**Format:** `{artifact['format'].upper()}`")
-                st.code(artifact["content"], language=artifact["format"])
+                content = artifact["content"]
+                fmt = artifact["format"].lower()
+                
+                # Show human-readable description + download option
+                if artifact["type"] == "cost_forecast":
+                    st.markdown("**Cost forecast summary** — Detailed monthly cost breakdown with optimization recommendations.")
+                    try:
+                        parsed = json.loads(content)
+                        st.json(parsed)
+                    except (json.JSONDecodeError, TypeError):
+                        st.code(content, language="json")
+                elif artifact["type"] == "compliance_report":
+                    st.markdown("**Compliance assessment report** — Regulatory findings per applicable framework.")
+                    st.markdown(content)
+                elif artifact["type"] == "rationale":
+                    st.markdown(content)
+                if artifact["type"] == "iac":
+                    st.markdown(f"**Infrastructure-as-Code template** — `{fmt.upper()}` configuration for the approved architecture.")
+                    lang = "bicep" if fmt == "bicep" else "hcl"
+                    st.code(content[:3000], language=lang)
+
+
+def _format_agent_output_human_readable(output: dict) -> str:
+    """Format agent output as human-readable text instead of raw JSON.
+    
+    Extracts key findings from the structured output and presents them
+    in a clear, readable format. Falls back to truncated JSON only
+    when parsing is not possible.
+    """
+    if not output:
+        return "<em>No output available</em>"
+    
+    # Handle raw/error responses from failed JSON parsing
+    if "raw" in output:
+        raw_text = output["raw"]
+        # Try to extract JSON manually
+        try:
+            import re
+            match = re.search(r'\{.*\}', raw_text, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group())
+                # Recursively format the parsed output
+                return _format_agent_output_human_readable(parsed)
+        except (json.JSONDecodeError, AttributeError):
+            pass
+        # Show truncated raw text with clear label
+        snippet = raw_text[:400]
+        return f"<div style='color: #aaa; font-size: 0.85rem;'><strong>Analysis output:</strong><br><code>{snippet}</code></div>"
+    
+    if "_error" in output or "error" in output:
+        err = output.get("_error", output.get("error", "Unknown error"))
+        return f"<div style='color: #EF4444;'>⚠️ {err}</div>"
+    
+    return None  # Signal to use the structured formatter instead
 
 
 def _get_summary(agent_type: str, output: dict) -> str:
-    """Extract a concise summary from agent output."""
+    """Extract a concise human-readable summary from agent output."""
+    # First try the human-readable formatter
+    formatted = _format_agent_output_human_readable(output)
+    if formatted is not None:
+        return formatted
+    
+    # Structured formatting based on agent type
     if agent_type == "architect" and "architecture" in output:
         arch = output["architecture"]
         parts = []
         for key in ["compute", "storage", "networking", "data"]:
-            rec = arch.get(key, {}).get("recommendation", "")[:80]
+            rec = arch.get(key, {}).get("recommendation", "")[:120]
             if rec:
                 parts.append(f"<strong>{key.title()}:</strong> {rec}")
+        summary = output.get("summary", "")
+        if summary:
+            parts.append(f"<br><em>— {summary[:200]}</em>")
         return "<br>".join(parts) if parts else json.dumps(output, indent=2)[:300]
     elif agent_type == "cost" and "analysis" in output:
         a = output["analysis"]
         cost = a.get("estimated_monthly_cost", "N/A")
+        breakdown = a.get("cost_breakdown", {})
         opts = a.get("cost_optimization_opportunities", [])
+        details = "<br>".join(f"<span style='color: #888;'>• {k}:</span> {v}" for k, v in list(breakdown.items())[:4])
         savings = "<br>".join(
             f"• {o.get('area', '')}: save {o.get('potential_savings', '')}"
-            for o in opts[:2]
+            for o in opts[:3]
         )
-        return f"<strong>Estimated cost:</strong> {cost}<br>{savings}"
+        return f"<strong>Estimated monthly cost:</strong> <span style='color: #F59E0B;'>{cost}</span><br>{details}<br><br><strong>Savings opportunities:</strong><br>{savings}"
     elif agent_type == "security" and "security_assessment" in output:
         s = output["security_assessment"]
         risk = s.get("overall_risk_rating", "N/A")
+        risk_color = {"LOW": "#10B981", "MEDIUM": "#F59E0B", "HIGH": "#EF4444", "CRITICAL": "#DC2626"}.get(risk.upper(), "#888")
         findings = s.get("findings", [])
-        gaps = [f.get("control", "") for f in findings
-                if f.get("status") in ("CRITICAL GAP", "CONFIGURATION NEEDED")]
-        gap_text = "<br>".join(f"• {g}" for g in gaps[:3])
-        return f"<strong>Risk:</strong> {risk}<br><strong>Issues:</strong> {gap_text}"
+        items = []
+        for f in findings[:5]:
+            status = f.get("status", "")
+            icon = {"OK": "✅", "RECOMMENDATION": "ℹ️", "CONFIGURATION NEEDED": "⚠️", "CRITICAL GAP": "🚫"}.get(status, "•")
+            items.append(f"{icon} <strong>{f.get('control', '')}</strong>: {f.get('details', '')[:100]}")
+        findings_text = "<br>".join(items)
+        return f"<strong>Risk rating:</strong> <span style='color: {risk_color};'>{risk}</span><br><br>{findings_text}"
     elif agent_type == "compliance" and "compliance_assessment" in output:
         c = output["compliance_assessment"]
         fw = ", ".join(c.get("applicable_frameworks", []))
-        return f"<strong>Frameworks:</strong> {fw}"
+        findings = c.get("findings", [])
+        items = []
+        for f in findings[:4]:
+            status = f.get("status", "")
+            icon = {"OK": "✅", "POTENTIAL VIOLATION": "🚫", "NEEDS DESIGN CONSIDERATION": "⚠️", "NOT COVERED IN ARCHITECTURE": "📋"}.get(status, "•")
+            items.append(f"{icon} <strong>{f.get('framework', '')}</strong>: {f.get('requirement', '')[:120]}")
+        findings_text = "<br>".join(items)
+        return f"<strong>Applicable frameworks:</strong> {fw}<br><br>{findings_text}"
     return json.dumps(output, indent=2)[:300]
 
 
@@ -681,15 +762,16 @@ def main():
     # Hero header
     st.markdown(
         "<div style='text-align: center; padding: 1.5rem 0 0.5rem 0;'>"
-        "<span style='font-size: 3rem;'>:material/architecture:</span>"
+        "<span style='font-size: 3rem;'>:material/cloud:</span>"
         "<h1 style='margin: 0.3rem 0 0 0; font-size: 2.2rem; "
         "background: linear-gradient(135deg, #6C5CE7, #a29bfe); "
         "-webkit-background-clip: text; -webkit-text-fill-color: transparent; "
         "background-clip: text;'>"
-        "AI Architect Panel</h1>"
+        "CloudOptima</h1>"
         "<p style='color: #888; max-width: 600px; margin: 0.3rem auto 0 auto;'>"
         "Describe your infrastructure needs below. Five AI specialists will "
-        "analyze, debate, and deliver a complete cloud architecture.</p>"
+        "analyze, debate, and deliver a complete cloud architecture with "
+        "cost estimates, security audits, and compliance reviews.</p>"
         "</div>",
         unsafe_allow_html=True,
     )

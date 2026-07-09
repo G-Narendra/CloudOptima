@@ -160,37 +160,79 @@ class TestAssemblePrompt:
 class TestGetSummary:
     """Test _get_summary logic from dashboard.py."""
 
+    def _format_raw_output(self, output: dict) -> str | None:
+        """Format raw/error output - mirrors dashboard._format_agent_output_human_readable."""
+        if not output:
+            return "<em>No output available</em>"
+        if "raw" in output:
+            raw_text = output["raw"]
+            try:
+                import re
+                match = re.search(r'\{.*\}', raw_text, re.DOTALL)
+                if match:
+                    parsed = json.loads(match.group())
+                    return self._get_summary("architect", parsed)  # Try to extract
+            except (json.JSONDecodeError, AttributeError):
+                pass
+            return f"<div style='color: #aaa; font-size: 0.85rem;'><strong>Analysis output:</strong><br><code>{raw_text[:400]}</code></div>"
+        if "_error" in output or "error" in output:
+            err = output.get("_error", output.get("error", "Unknown error"))
+            return f"<div style='color: #EF4444;'>⚠️ {err}</div>"
+        return None
+
     def _get_summary(self, agent_type: str, output: dict) -> str:
         """Replicate _get_summary from dashboard.py for isolated testing."""
+        formatted = self._format_raw_output(output)
+        if formatted is not None:
+            return formatted
+
         if agent_type == "architect" and "architecture" in output:
             arch = output["architecture"]
             parts = []
             for key in ["compute", "storage", "networking", "data"]:
-                rec = arch.get(key, {}).get("recommendation", "")[:80]
+                rec = arch.get(key, {}).get("recommendation", "")[:120]
                 if rec:
                     parts.append(f"<strong>{key.title()}:</strong> {rec}")
+            summary = output.get("summary", "")
+            if summary:
+                parts.append(f"<br><em>— {summary[:200]}</em>")
             return "<br>".join(parts) if parts else json.dumps(output, indent=2)[:300]
         elif agent_type == "cost" and "analysis" in output:
             a = output["analysis"]
             cost = a.get("estimated_monthly_cost", "N/A")
+            breakdown = a.get("cost_breakdown", {})
             opts = a.get("cost_optimization_opportunities", [])
+            details = "<br>".join(
+                f"<span style='color: #888;'>• {k}:</span> {v}"
+                for k, v in list(breakdown.items())[:4]
+            )
             savings = "<br>".join(
                 f"• {o.get('area', '')}: save {o.get('potential_savings', '')}"
-                for o in opts[:2]
+                for o in opts[:3]
             )
-            return f"<strong>Estimated cost:</strong> {cost}<br>{savings}"
+            return f"<strong>Estimated monthly cost:</strong> <span style='color: #F59E0B;'>{cost}</span><br>{details}<br><br><strong>Savings opportunities:</strong><br>{savings}"
         elif agent_type == "security" and "security_assessment" in output:
             s = output["security_assessment"]
             risk = s.get("overall_risk_rating", "N/A")
             findings = s.get("findings", [])
-            gaps = [f.get("control", "") for f in findings
-                    if f.get("status") in ("CRITICAL GAP", "CONFIGURATION NEEDED")]
-            gap_text = "<br>".join(f"• {g}" for g in gaps[:3])
-            return f"<strong>Risk:</strong> {risk}<br><strong>Issues:</strong> {gap_text}"
+            items = []
+            for f in findings[:5]:
+                status = f.get("status", "")
+                icon = {"OK": "✅", "RECOMMENDATION": "ℹ️", "CONFIGURATION NEEDED": "⚠️", "CRITICAL GAP": "🚫"}.get(status, "•")
+                items.append(f"{icon} <strong>{f.get('control', '')}</strong>: {f.get('details', '')[:100]}")
+            findings_text = "<br>".join(items)
+            return f"<strong>Risk rating:</strong> <span style='color: #EF4444;'>{risk}</span><br><br>{findings_text}"
         elif agent_type == "compliance" and "compliance_assessment" in output:
             c = output["compliance_assessment"]
             fw = ", ".join(c.get("applicable_frameworks", []))
-            return f"<strong>Frameworks:</strong> {fw}"
+            findings = c.get("findings", [])
+            items = []
+            for f in findings[:4]:
+                status = f.get("status", "")
+                icon = {"OK": "✅", "POTENTIAL VIOLATION": "🚫", "NEEDS DESIGN CONSIDERATION": "⚠️", "NOT COVERED IN ARCHITECTURE": "📋"}.get(status, "•")
+                items.append(f"{icon} <strong>{f.get('framework', '')}</strong>: {f.get('requirement', '')[:120]}")
+            findings_text = "<br>".join(items)
+            return f"<strong>Applicable frameworks:</strong> {fw}<br><br>{findings_text}"
         return json.dumps(output, indent=2)[:300]
 
     def test_architect_summary(self):

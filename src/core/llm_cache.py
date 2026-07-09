@@ -1,5 +1,5 @@
 """
-The AI Architect Panel — In-Memory + Disk-Persisted LLM Response Cache
+CloudOptima — In-Memory + Disk-Persisted LLM Response Cache
 
 Caches LLM responses keyed by (messages_hash, model, temperature) to
 avoid redundant API calls for identical prompts. Uses SHA256 hashing

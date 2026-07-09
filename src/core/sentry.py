@@ -1,4 +1,4 @@
-"""The AI Architect Panel — Sentry Error Tracking
+"""CloudOptima — Sentry Error Tracking
 
 Initializes Sentry SDK for production error monitoring with:
 - Performance tracing (auto-instrumentation of functions)

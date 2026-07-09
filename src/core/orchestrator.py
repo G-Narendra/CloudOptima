@@ -533,7 +533,7 @@ class Orchestrator:
             except Exception:
                 architecture_json = '{"note": "Architecture details unavailable"}'
 
-        bicep = f"""// The AI Architect Panel - Generated Bicep Template
+        bicep = f"""// CloudOptima - Generated Bicep Template
 // Session: {arb.session_id}
 // WARNING: This is a template. Review and customize before deployment.
 // Human approval is required before applying to any subscription.
@@ -542,7 +542,7 @@ class Orchestrator:
 
 param location string = resourceGroup().location
 param tags object = {{
-    project: 'ai-architect-panel'
+    project: 'cloudoptima'
     session: '{arb.session_id}'
 }}
 
@@ -563,7 +563,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {{
 output architectureJson string = '{architecture_json}'
 """
 
-        terraform = f"""# The AI Architect Panel - Generated Terraform Configuration
+        terraform = f"""# CloudOptima - Generated Terraform Configuration
 # Session: {arb.session_id}
 # WARNING: This is a template. Review and customize before deployment.
 # Human approval is required before applying to any subscription.
@@ -584,10 +584,10 @@ provider "azurerm" {{
 }}
 
 locals {{
-  project_name = "ai-architect-panel"
+  project_name = "cloudoptima"
   session_id   = "{arb.session_id}"
   tags = {{
-    Project = "ai-architect-panel"
+    Project = "cloudoptima"
     Session = "{arb.session_id}"
   }}
 }}

@@ -40,6 +40,20 @@ prn
 lpt1
 com1
 
+# Unwanted project files (removed from git)
+run.py
+ARCHITECTURE.md
+Dockerfile
+docker-compose.yml
+.dockerignore
+.github/
+.agents/
+.claude/
+docs/
+src/api/
+src/cli/
+src/core/compliance_rag.py
+
 # Generated artifacts
 coverage.xml
 .freebuff/context/

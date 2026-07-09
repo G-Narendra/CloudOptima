@@ -1,5 +1,5 @@
 """
-The AI Architect Panel — Pydantic Validation Schemas for Agent Outputs
+CloudOptima — Pydantic Validation Schemas for Agent Outputs
 
 Replaces ad-hoc JSON regex parsing with typed, validated Pydantic models.
 Every agent response is validated against its schema at parse time.

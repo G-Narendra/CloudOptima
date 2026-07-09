@@ -1,4 +1,4 @@
-"""The AI Architect Panel - Configuration."""
+"""CloudOptima - Application Configuration."""
 
 from pydantic_settings import BaseSettings
 from typing import Optional
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     azure_tenant_id: Optional[str] = None
 
     # App
-    app_name: str = "The AI Architect Panel"
+    app_name: str = "CloudOptima"
     app_version: str = "1.0.0"
     log_level: str = "INFO"
 

@@ -1,4 +1,4 @@
-"""The AI Architect Panel - Data Models."""
+"""CloudOptima - Data Models."""
 
 from __future__ import annotations
 import uuid
