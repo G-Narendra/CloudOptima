@@ -231,4 +231,77 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
 
 ---
 
+## Deployment
 
+### Streamlit Community Cloud (Recommended — Free)
+
+Deploy CloudOptima for free on [Streamlit Community Cloud](https://streamlit.io/cloud) in minutes:
+
+```mermaid
+flowchart LR
+    A[Push to GitHub] --> B[Sign in at share.streamlit.io]
+    B --> C[Click "New app"]
+    C --> D[Select CloudOptima repo]
+    D --> E[Set main file: dashboard.py]
+    E --> F[Click "Deploy"]
+    F --> G[cloudoptima.streamlit.app]
+```
+
+**Step-by-step:**
+
+1. **Push to GitHub** — The repo is already at `github.com/G-Narendra/CloudOptima`
+2. **Sign in** — Go to [share.streamlit.io](https://share.streamlit.io) and sign in with your GitHub account
+3. **New app** — Click "New app" → "From existing repo"
+4. **Select repo** — Choose `G-Narendra/CloudOptima`
+5. **Configure:**
+   - **Branch:** `main`
+   - **Main file:** `dashboard.py`
+6. **Deploy** — Click "Deploy!" and wait ~2 minutes
+
+**Configure secrets (optional):**
+
+Once deployed, go to your app's settings → **Secrets** and add:
+
+```toml
+# Demo mode works out of the box — no secrets needed!
+# For live NVIDIA API:
+NVIDIA_API_KEY = "nvapi-your-key-here"
+DEMO_MODE = "false"
+
+# Optional: Error tracking
+SENTRY_DSN = "https://your-dsn@sentry.io/123"
+```
+
+Your app will be live at **`https://cloudoptima.streamlit.app`** 🎉
+
+---
+
+## Project Structure
+
+```
+cloudoptima/
+├── dashboard.py              # Streamlit UI — entry point
+├── src/
+│   └── core/
+│       ├── orchestrator.py   # Session manager & agent runner
+│       ├── agent_base.py     # Specialist agent system prompts
+│       ├── agent_schemas.py  # Pydantic validation schemas
+│       ├── models.py         # Data models (Session, AgentTurn, etc.)
+│       ├── nvidia_client.py  # NVIDIA NIMs API client
+│       ├── llm_cache.py      # Disk-persisted LLM cache
+│       ├── azure_prices_api.py # Live Azure Retail Prices API client
+│       ├── azure_pricing.py  # Static pricing fallback data
+│       ├── compliance_rules.py # RAG compliance rules engine
+│       ├── health.py         # Health check registry
+│       ├── sanitize.py       # Input sanitization
+│       ├── sentry.py         # Sentry error tracking
+│       ├── observability.py  # Tracing, audit, metrics
+│       └── config.py         # Pydantic settings
+├── tests/                    # 205+ tests
+├── .streamlit/config.toml    # Streamlit config
+├── .env.example              # Environment template
+├── requirements.txt
+├── pyproject.toml
+├── README.md
+└── CONTRIBUTING.md
+```
