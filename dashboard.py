@@ -665,34 +665,210 @@ def render_results(result: dict):
 
 
 def _get_summary(agent_type: str, output: dict) -> str:
-    """Show agent output in a clean code block.
+    """Render agent output as clean, human-readable HTML.
     
-    Shows the raw JSON output directly so users can see the structured data.
-    Truncates to show key sections without overwhelming the UI.
+    Each agent type has a distinct structure. This function parses the
+    structured JSON and renders it with proper hierarchy, colors, and icons.
     """
     if not output:
         return "<code>No output available</code>"
-    
+
     # Handle error responses
     if "_error" in output or "error" in output:
         err = output.get("_error", output.get("error", "Unknown error"))
         return f"<code style='color: #EF4444;'>Error: {err}</code>"
-    
-    # Show raw output as formatted JSON (this is what users prefer)
-    text = output.get("raw", "")
-    if text:
-        # Strip code fences for cleaner display
-        clean = text.replace('```json', '').replace('```', '').strip()
-        # Show first 1500 chars in a code block
-        display = clean[:1500]
-        if len(clean) > 1500:
-            display += "\n... (truncated, see full JSON below)"
-        return f"<pre style='font-size: 0.75rem; line-height: 1.4; color: #ccc; max-height: 300px; overflow-y: auto; white-space: pre-wrap;'>{display}</pre>"
-    
-    # Structured output - show as JSON
+
+    # Handle raw/unparsed output (only shows if build_result_dict failed to parse)
+    if "raw" in output:
+        text = output["raw"]
+        clean = text.replace('```json', '').replace('```', '').strip()[:1000]
+        return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{clean}</pre>"
+
+    # ── Architect ────────────────────────────────────────────────────
+    if agent_type == "architect":
+        arch = output.get("architecture", {})
+        sections = []
+        for key in ["compute", "storage", "networking", "data"]:
+            section = arch.get(key, {})
+            rec = section.get("recommendation", "")
+            justification = section.get("justification", "")
+            alts = section.get("alternatives", [])
+            if rec:
+                parts = f"<strong style='color:#a29bfe;'>{key.title()}</strong>"
+                parts += f"<div style='margin:0.25rem 0 0 0;'>{rec}</div>"
+                if justification:
+                    parts += f"<div style='color:#999;font-size:0.8rem;margin:0.2rem 0;'>→ {justification[:200]}</div>"
+                if alts:
+                    alt_text = "<span style='color:#666;font-size:0.75rem;'>Alternatives: </span>"
+                    alt_text += "<span style='color:#888;font-size:0.75rem;'>" + " | ".join(alts) + "</span>"
+                    parts += f"<div style='margin:0.15rem 0 0.4rem 0;'>{alt_text}</div>"
+                sections.append(parts)
+        summary = arch.get("summary", "")
+        if summary:
+            sections.append(f"<em style='color:#aaa;font-size:0.85rem;'>— {summary}</em>")
+        if sections:
+            return "<div style='line-height:1.6;'>" + "<hr style='border-color:rgba(255,255,255,0.05);margin:0.3rem 0;'>".join(sections) + "</div>"
+        return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{json.dumps(output, indent=2)[:1500]}</pre>"
+
+    # ── Cost Analyst ─────────────────────────────────────────────────
+    if agent_type == "cost":
+        analysis = output.get("analysis", {})
+        parts = []
+
+        cost = analysis.get("estimated_monthly_cost", "")
+        if cost:
+            parts.append(
+                f"<div style='display:flex;justify-content:space-between;align-items:center;'>"
+                f"<span style='color:#F59E0B;font-weight:600;'>Estimated Monthly Cost</span>"
+                f"<span style='font-size:1.2rem;font-weight:700;color:#FBBF24;'>{cost}</span>"
+                f"</div>"
+            )
+
+        breakdown = analysis.get("cost_breakdown", {})
+        if breakdown:
+            items = "".join(
+                f"<div style='display:flex;justify-content:space-between;font-size:0.8rem;"
+                f"padding:0.15rem 0;border-bottom:1px solid rgba(255,255,255,0.04);'>"
+                f"<span style='color:#aaa;'>{k.replace('_', ' ').title()}</span>"
+                f"<span style='color:#ddd;'>{v}</span></div>"
+                for k, v in breakdown.items()
+            )
+            parts.append(
+                f"<div style='margin:0.5rem 0;padding:0.4rem;background:rgba(255,255,255,0.03);"
+                f"border-radius:6px;'>"
+                f"<div style='color:#999;font-size:0.75rem;text-transform:uppercase;"
+                f"letter-spacing:1px;margin-bottom:0.3rem;'>Cost Breakdown</div>{items}</div>"
+            )
+
+        optimizations = analysis.get("cost_optimization_opportunities", [])
+        if optimizations:
+            opt_items = "".join(
+                f"<div style='display:flex;justify-content:space-between;align-items:center;"
+                f"padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.04);'>"
+                f"<div style='flex:1;'>"
+                f"<div style='color:#F59E0B;font-size:0.8rem;'>{o['area']}</div>"
+                f"<div style='color:#999;font-size:0.75rem;'>{o.get('recommendation', '')[:120]}</div>"
+                f"</div>"
+                f"<span style='color:#10B981;font-weight:600;font-size:0.9rem;'>{o.get('potential_savings', '')}</span>"
+                f"</div>"
+                for o in optimizations
+            )
+            parts.append(
+                f"<div style='margin:0.5rem 0;'>"
+                f"<div style='color:#999;font-size:0.75rem;text-transform:uppercase;"
+                f"letter-spacing:1px;margin-bottom:0.3rem;'>Savings Opportunities</div>{opt_items}</div>"
+            )
+
+        threshold = analysis.get("budget_alert_threshold", "")
+        if threshold:
+            parts.append(
+                f"<div style='color:#888;font-size:0.75rem;border-top:1px solid "
+                f"rgba(255,255,255,0.05);padding-top:0.3rem;'>{threshold}</div>"
+            )
+
+        if parts:
+            return "<div style='line-height:1.5;'>" + "".join(parts) + "</div>"
+        return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{json.dumps(output, indent=2)[:1500]}</pre>"
+
+    # ── Security Engineer ─────────────────────────────────────────────
+    if agent_type == "security":
+        assessment = output.get("security_assessment", {})
+        parts = []
+
+        risk = assessment.get("overall_risk_rating", "MEDIUM")
+        risk_colors = {"LOW": "#10B981", "MEDIUM": "#F59E0B", "HIGH": "#EF4444", "CRITICAL": "#DC2626"}
+        color = risk_colors.get(risk.upper(), "#F59E0B")
+        parts.append(
+            f"<div style='display:flex;justify-content:space-between;align-items:center;'>"
+            f"<span style='color:#EF4444;font-weight:600;'>Overall Risk Rating</span>"
+            f"<span style='color:{color};font-weight:700;font-size:1.1rem;'>{risk.upper()}</span>"
+            f"</div>"
+        )
+
+        findings = assessment.get("findings", [])
+        if findings:
+            find_items = "".join(
+                f"<div style='padding:0.4rem;margin:0.3rem 0;background:rgba(255,255,255,0.03);"
+                f"border-radius:6px;border-left:3px solid "
+                f"{'#10B981' if f['status'].startswith('OK') else '#F59E0B' if 'NEED' in f['status'] or 'RECOMMEND' in f['status'].upper() else '#EF4444'};'>"
+                f"<div style='display:flex;justify-content:space-between;'>"
+                f"<span style='font-weight:500;font-size:0.85rem;color:#ddd;'>{f['control']}</span>"
+                f"<span style='font-size:0.7rem;color:#888;'>{f['status']}</span>"
+                f"</div>"
+                f"<div style='color:#aaa;font-size:0.8rem;margin-top:0.2rem;'>{f.get('details', '')[:200]}</div>"
+                f"<div style='color:#666;font-size:0.75rem;margin-top:0.15rem;font-style:italic;'>"
+                f"Risk: {f.get('risk_if_unaddressed', '')[:150]}</div>"
+                f"</div>"
+                for f in findings
+            )
+            parts.append(
+                f"<div style='margin:0.5rem 0;'>"
+                f"<div style='color:#999;font-size:0.75rem;text-transform:uppercase;"
+                f"letter-spacing:1px;margin-bottom:0.3rem;'>Findings ({len(findings)})</div>{find_items}</div>"
+            )
+
+        if parts:
+            return "<div style='line-height:1.5;'>" + "".join(parts) + "</div>"
+        return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{json.dumps(output, indent=2)[:1500]}</pre>"
+
+    # ── Compliance Officer ────────────────────────────────────────────
+    if agent_type == "compliance":
+        assessment = output.get("compliance_assessment", {})
+        parts = []
+
+        frameworks = assessment.get("applicable_frameworks", [])
+        if frameworks:
+            badge_html = "".join(
+                f"<span style='display:inline-block;padding:0.15rem 0.5rem;margin:0.15rem;"
+                f"background:rgba(59,130,246,0.15);color:#93C5FD;border-radius:4px;"
+                f"font-size:0.75rem;'>{f}</span>"
+                for f in frameworks
+            )
+            parts.append(
+                f"<div style='margin:0 0 0.5rem 0;'>"
+                f"<div style='color:#3B82F6;font-weight:600;margin-bottom:0.2rem;'>"
+                f"Applicable Frameworks</div>{badge_html}</div>"
+            )
+
+        findings = assessment.get("findings", [])
+        if findings:
+            status_colors = {
+                "POTENTIAL VIOLATION": "#EF4444",
+                "NEEDS DESIGN CONSIDERATION": "#F59E0B",
+                "NOT COVERED": "#F59E0B",
+                "OK": "#10B981",
+            }
+            find_items = "".join(
+                f"<div style='padding:0.4rem;margin:0.3rem 0;background:rgba(255,255,255,0.03);"
+                f"border-radius:6px;border-left:3px solid "
+                f"{status_colors.get(f['status'], '#888')};'>"
+                f"<div style='display:flex;justify-content:space-between;'>"
+                f"<span style='font-weight:500;font-size:0.85rem;color:#ddd;'>{f.get('constraint_type', '')} — {f['framework']}</span>"
+                f"<span style='font-size:0.7rem;color:{status_colors.get(f['status'], '#888')};'>{f['status']}</span>"
+                f"</div>"
+                f"<div style='color:#aaa;font-size:0.8rem;margin-top:0.2rem;'>{f.get('details', '')[:200]}</div>"
+                f"<div style='display:flex;justify-content:space-between;margin-top:0.15rem;'>"
+                f"<span style='color:#3B82F6;font-size:0.75rem;'>{f.get('source_citation', '')[:120]}</span>"
+                f"</div>"
+                f"<div style='color:#93C5FD;font-size:0.78rem;margin-top:0.15rem;'>"
+                f"💡 {f.get('recommendation', '')[:200]}</div>"
+                f"</div>"
+                for f in findings
+            )
+            parts.append(
+                f"<div style='margin:0.5rem 0;'>"
+                f"<div style='color:#999;font-size:0.75rem;text-transform:uppercase;"
+                f"letter-spacing:1px;margin-bottom:0.3rem;'>Findings ({len(findings)})</div>{find_items}</div>"
+            )
+
+        if parts:
+            return "<div style='line-height:1.5;'>" + "".join(parts) + "</div>"
+        return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{json.dumps(output, indent=2)[:1500]}</pre>"
+
+    # Fallback: show as JSON
     try:
         formatted = json.dumps(output, indent=2, default=str)[:1500]
-        return f"<pre style='font-size: 0.75rem; line-height: 1.4; color: #ccc; max-height: 300px; overflow-y: auto; white-space: pre-wrap;'>{formatted}</pre>"
+        return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{formatted}</pre>"
     except Exception:
         return str(output)[:1500]
 

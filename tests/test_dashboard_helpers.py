@@ -163,75 +163,210 @@ class TestGetSummary:
     def _get_summary(self, agent_type: str, output: dict) -> str:
         """Replicate _get_summary from dashboard.py for isolated testing."""
         if not output:
-            return "<em>No output available</em>"
-        
+            return "<code>No output available</code>"
+
         if "_error" in output or "error" in output:
             err = output.get("_error", output.get("error", "Unknown error"))
-            return f"<div style='color: #EF4444;'>⚠️ {err}</div>"
-        
-        if "raw" in output:
-            import re
-            raw_text = output["raw"]
-            match = re.search(r'\{.*\}', raw_text, re.DOTALL)
-            if match:
-                try:
-                    parsed = json.loads(match.group())
-                    output = parsed
-                except (json.JSONDecodeError, AttributeError):
-                    lines = [l.strip() for l in raw_text.replace('```json', '').replace('```', '').split('\n')]
-                    readable = [l for l in lines if l and len(l) > 30 and '"' not in l[:3]]
-                    if readable:
-                        return "<br>".join(readable[:5])
-                    return "<em>Agent output available in JSON view below</em>"
+            return f"<code style='color: #EF4444;'>Error: {err}</code>"
 
-        if agent_type == "architect" and "architecture" in output:
-            arch = output["architecture"]
-            parts = []
+        if "raw" in output:
+            text = output["raw"]
+            clean = text.replace('```json', '').replace('```', '').strip()[:1000]
+            return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{clean}</pre>"
+
+        # ── Architect ────────────────────────────────────────────────────
+        if agent_type == "architect":
+            arch = output.get("architecture", {})
+            sections = []
             for key in ["compute", "storage", "networking", "data"]:
-                rec = arch.get(key, {}).get("recommendation", "")[:120]
+                section = arch.get(key, {})
+                rec = section.get("recommendation", "")
+                justification = section.get("justification", "")
+                alts = section.get("alternatives", [])
                 if rec:
-                    parts.append(f"<strong>{key.title()}:</strong> {rec}")
-            summary = output.get("summary", "")
+                    parts = f"<strong style='color:#a29bfe;'>{key.title()}</strong>"
+                    parts += f"<div style='margin:0.25rem 0 0 0;'>{rec}</div>"
+                    if justification:
+                        parts += f"<div style='color:#999;font-size:0.8rem;margin:0.2rem 0;'>→ {justification[:200]}</div>"
+                    if alts:
+                        alt_text = "<span style='color:#666;font-size:0.75rem;'>Alternatives: </span>"
+                        alt_text += "<span style='color:#888;font-size:0.75rem;'>" + " | ".join(alts) + "</span>"
+                        parts += f"<div style='margin:0.15rem 0 0.4rem 0;'>{alt_text}</div>"
+                    sections.append(parts)
+            summary = arch.get("summary", "")
             if summary:
-                parts.append(f"<br><em>— {summary[:200]}</em>")
-            return "<br>".join(parts) if parts else json.dumps(output, indent=2)[:300]
-        elif agent_type == "cost" and "analysis" in output:
-            a = output["analysis"]
-            cost = a.get("estimated_monthly_cost", "N/A")
-            breakdown = a.get("cost_breakdown", {})
-            opts = a.get("cost_optimization_opportunities", [])
-            details = "<br>".join(
-                f"<span style='color: #888;'>• {k}:</span> {v}"
-                for k, v in list(breakdown.items())[:4]
+                sections.append(f"<em style='color:#aaa;font-size:0.85rem;'>— {summary}</em>")
+            if sections:
+                return "<div style='line-height:1.6;'>" + "<hr style='border-color:rgba(255,255,255,0.05);margin:0.3rem 0;'>".join(sections) + "</div>"
+            return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{json.dumps(output, indent=2)[:1500]}</pre>"
+
+        # ── Cost Analyst ─────────────────────────────────────────────────
+        if agent_type == "cost":
+            analysis = output.get("analysis", {})
+            parts = []
+
+            cost = analysis.get("estimated_monthly_cost", "")
+            if cost:
+                parts.append(
+                    f"<div style='display:flex;justify-content:space-between;align-items:center;'>"
+                    f"<span style='color:#F59E0B;font-weight:600;'>Estimated Monthly Cost</span>"
+                    f"<span style='font-size:1.2rem;font-weight:700;color:#FBBF24;'>{cost}</span>"
+                    f"</div>"
+                )
+
+            breakdown = analysis.get("cost_breakdown", {})
+            if breakdown:
+                items = "".join(
+                    f"<div style='display:flex;justify-content:space-between;font-size:0.8rem;"
+                    f"padding:0.15rem 0;border-bottom:1px solid rgba(255,255,255,0.04);'>"
+                    f"<span style='color:#aaa;'>{k.replace('_', ' ').title()}</span>"
+                    f"<span style='color:#ddd;'>{v}</span></div>"
+                    for k, v in breakdown.items()
+                )
+                parts.append(
+                    f"<div style='margin:0.5rem 0;padding:0.4rem;background:rgba(255,255,255,0.03);"
+                    f"border-radius:6px;'>"
+                    f"<div style='color:#999;font-size:0.75rem;text-transform:uppercase;"
+                    f"letter-spacing:1px;margin-bottom:0.3rem;'>Cost Breakdown</div>{items}</div>"
+                )
+
+            optimizations = analysis.get("cost_optimization_opportunities", [])
+            if optimizations:
+                opt_items = "".join(
+                    f"<div style='display:flex;justify-content:space-between;align-items:center;"
+                    f"padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.04);'>"
+                    f"<div style='flex:1;'>"
+                    f"<div style='color:#F59E0B;font-size:0.8rem;'>{o['area']}</div>"
+                    f"<div style='color:#999;font-size:0.75rem;'>{o.get('recommendation', '')[:120]}</div>"
+                    f"</div>"
+                    f"<span style='color:#10B981;font-weight:600;font-size:0.9rem;'>{o.get('potential_savings', '')}</span>"
+                    f"</div>"
+                    for o in optimizations
+                )
+                parts.append(
+                    f"<div style='margin:0.5rem 0;'>"
+                    f"<div style='color:#999;font-size:0.75rem;text-transform:uppercase;"
+                    f"letter-spacing:1px;margin-bottom:0.3rem;'>Savings Opportunities</div>{opt_items}</div>"
+                )
+
+            threshold = analysis.get("budget_alert_threshold", "")
+            if threshold:
+                parts.append(
+                    f"<div style='color:#888;font-size:0.75rem;border-top:1px solid "
+                    f"rgba(255,255,255,0.05);padding-top:0.3rem;'>{threshold}</div>"
+                )
+
+            if parts:
+                return "<div style='line-height:1.5;'>" + "".join(parts) + "</div>"
+            return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{json.dumps(output, indent=2)[:1500]}</pre>"
+
+        # ── Security Engineer ─────────────────────────────────────────────
+        if agent_type == "security":
+            assessment = output.get("security_assessment", {})
+            parts = []
+
+            risk = assessment.get("overall_risk_rating", "MEDIUM")
+            risk_colors = {"LOW": "#10B981", "MEDIUM": "#F59E0B", "HIGH": "#EF4444", "CRITICAL": "#DC2626"}
+            color = risk_colors.get(risk.upper(), "#F59E0B")
+            parts.append(
+                f"<div style='display:flex;justify-content:space-between;align-items:center;'>"
+                f"<span style='color:#EF4444;font-weight:600;'>Overall Risk Rating</span>"
+                f"<span style='color:{color};font-weight:700;font-size:1.1rem;'>{risk.upper()}</span>"
+                f"</div>"
             )
-            savings = "<br>".join(
-                f"• {o.get('area', '')}: save {o.get('potential_savings', '')}"
-                for o in opts[:3]
-            )
-            return f"<strong>Estimated monthly cost:</strong> <span style='color: #F59E0B;'>{cost}</span><br>{details}<br><br><strong>Savings opportunities:</strong><br>{savings}"
-        elif agent_type == "security" and "security_assessment" in output:
-            s = output["security_assessment"]
-            risk = s.get("overall_risk_rating", "N/A")
-            findings = s.get("findings", [])
-            items = []
-            for f in findings[:5]:
-                status = f.get("status", "")
-                icon = {"OK": "✅", "RECOMMENDATION": "ℹ️", "CONFIGURATION NEEDED": "⚠️", "CRITICAL GAP": "🚫"}.get(status, "•")
-                items.append(f"{icon} <strong>{f.get('control', '')}</strong>: {f.get('details', '')[:100]}")
-            findings_text = "<br>".join(items)
-            return f"<strong>Risk rating:</strong> <span style='color: #EF4444;'>{risk}</span><br><br>{findings_text}"
-        elif agent_type == "compliance" and "compliance_assessment" in output:
-            c = output["compliance_assessment"]
-            fw = ", ".join(c.get("applicable_frameworks", []))
-            findings = c.get("findings", [])
-            items = []
-            for f in findings[:4]:
-                status = f.get("status", "")
-                icon = {"OK": "✅", "POTENTIAL VIOLATION": "🚫", "NEEDS DESIGN CONSIDERATION": "⚠️", "NOT COVERED IN ARCHITECTURE": "📋"}.get(status, "•")
-                items.append(f"{icon} <strong>{f.get('framework', '')}</strong>: {f.get('requirement', '')[:120]}")
-            findings_text = "<br>".join(items)
-            return f"<strong>Applicable frameworks:</strong> {fw}<br><br>{findings_text}"
-        return json.dumps(output, indent=2)[:300]
+
+            findings = assessment.get("findings", [])
+            if findings:
+                def _status_color(status):
+                    if status.startswith("OK"):
+                        return "#10B981"
+                    if "NEED" in status or "RECOMMEND" in status.upper():
+                        return "#F59E0B"
+                    return "#EF4444"
+
+                find_items = "".join(
+                    f"<div style='padding:0.4rem;margin:0.3rem 0;background:rgba(255,255,255,0.03);"
+                    f"border-radius:6px;border-left:3px solid {_status_color(f['status'])};'>"
+                    f"<div style='display:flex;justify-content:space-between;'>"
+                    f"<span style='font-weight:500;font-size:0.85rem;color:#ddd;'>{f['control']}</span>"
+                    f"<span style='font-size:0.7rem;color:#888;'>{f['status']}</span>"
+                    f"</div>"
+                    f"<div style='color:#aaa;font-size:0.8rem;margin-top:0.2rem;'>{f.get('details', '')[:200]}</div>"
+                    f"<div style='color:#666;font-size:0.75rem;margin-top:0.15rem;font-style:italic;'>"
+                    f"Risk: {f.get('risk_if_unaddressed', '')[:150]}</div>"
+                    f"</div>"
+                    for f in findings
+                )
+                parts.append(
+                    f"<div style='margin:0.5rem 0;'>"
+                    f"<div style='color:#999;font-size:0.75rem;text-transform:uppercase;"
+                    f"letter-spacing:1px;margin-bottom:0.3rem;'>Findings ({len(findings)})</div>{find_items}</div>"
+                )
+
+            if parts:
+                return "<div style='line-height:1.5;'>" + "".join(parts) + "</div>"
+            return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{json.dumps(output, indent=2)[:1500]}</pre>"
+
+        # ── Compliance Officer ────────────────────────────────────────────
+        if agent_type == "compliance":
+            assessment = output.get("compliance_assessment", {})
+            parts = []
+
+            frameworks = assessment.get("applicable_frameworks", [])
+            if frameworks:
+                badge_html = "".join(
+                    f"<span style='display:inline-block;padding:0.15rem 0.5rem;margin:0.15rem;"
+                    f"background:rgba(59,130,246,0.15);color:#93C5FD;border-radius:4px;"
+                    f"font-size:0.75rem;'>{f}</span>"
+                    for f in frameworks
+                )
+                parts.append(
+                    f"<div style='margin:0 0 0.5rem 0;'>"
+                    f"<div style='color:#3B82F6;font-weight:600;margin-bottom:0.2rem;'>"
+                    f"Applicable Frameworks</div>{badge_html}</div>"
+                )
+
+            findings = assessment.get("findings", [])
+            if findings:
+                status_colors = {
+                    "POTENTIAL VIOLATION": "#EF4444",
+                    "NEEDS DESIGN CONSIDERATION": "#F59E0B",
+                    "NOT COVERED": "#F59E0B",
+                    "OK": "#10B981",
+                }
+                find_items = "".join(
+                    f"<div style='padding:0.4rem;margin:0.3rem 0;background:rgba(255,255,255,0.03);"
+                    f"border-radius:6px;border-left:3px solid "
+                    f"{status_colors.get(f['status'], '#888')};'>"
+                    f"<div style='display:flex;justify-content:space-between;'>"
+                    f"<span style='font-weight:500;font-size:0.85rem;color:#ddd;'>{f.get('constraint_type', '')} — {f['framework']}</span>"
+                    f"<span style='font-size:0.7rem;color:{status_colors.get(f['status'], '#888')};'>{f['status']}</span>"
+                    f"</div>"
+                    f"<div style='color:#aaa;font-size:0.8rem;margin-top:0.2rem;'>{f.get('details', '')[:200]}</div>"
+                    f"<div style='display:flex;justify-content:space-between;margin-top:0.15rem;'>"
+                    f"<span style='color:#3B82F6;font-size:0.75rem;'>{f.get('source_citation', '')[:120]}</span>"
+                    f"</div>"
+                    f"<div style='color:#93C5FD;font-size:0.78rem;margin-top:0.15rem;'>"
+                    f"💡 {f.get('recommendation', '')[:200]}</div>"
+                    f"</div>"
+                    for f in findings
+                )
+                parts.append(
+                    f"<div style='margin:0.5rem 0;'>"
+                    f"<div style='color:#999;font-size:0.75rem;text-transform:uppercase;"
+                    f"letter-spacing:1px;margin-bottom:0.3rem;'>Findings ({len(findings)})</div>{find_items}</div>"
+                )
+
+            if parts:
+                return "<div style='line-height:1.5;'>" + "".join(parts) + "</div>"
+            return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{json.dumps(output, indent=2)[:1500]}</pre>"
+
+        # Fallback: show as JSON
+        try:
+            formatted = json.dumps(output, indent=2, default=str)[:1500]
+            return f"<pre style='font-size:0.75rem;color:#ccc;max-height:200px;overflow-y:auto;'>{formatted}</pre>"
+        except Exception:
+            return str(output)[:1500]
 
     def test_architect_summary(self):
         output = {
