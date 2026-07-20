@@ -43,9 +43,6 @@ com1
 # Unwanted project files (removed from git)
 run.py
 ARCHITECTURE.md
-Dockerfile
-docker-compose.yml
-.dockerignore
 .github/
 .agents/
 .claude/
