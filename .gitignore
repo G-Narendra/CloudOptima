@@ -26,12 +26,7 @@ Thumbs.db
 
 # Project
 *.log
-.freebuff/qa-reports/
-.freebuff/security-reports/
-.freebuff/compliance_db/
-.freebuff/traces/
-.freebuff/audit/
-.freebuff/llm_cache.json
+.freebuff/
 
 # Windows reserved device names
 nul
@@ -40,17 +35,17 @@ prn
 lpt1
 com1
 
-# Unwanted project files (removed from git)
+# Internal utilities and docs (not part of the codebase)
 run.py
 ARCHITECTURE.md
 .github/
 .agents/
 .claude/
 docs/
+scripts/
 src/api/
 src/cli/
 src/core/compliance_rag.py
 
 # Generated artifacts
 coverage.xml
-.freebuff/context/
