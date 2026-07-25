@@ -1,0 +1,2912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloudOptima — Master Technical Guide</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #0d0d1a;
+        color: #e0e0f0;
+        line-height: 1.7;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 60px;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #6C5CE7, #a29bfe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 1.5rem 0 0.5rem;
+        padding-bottom: 0.3rem;
+        border-bottom: 2px solid rgba(108, 92, 231, 0.3);
+    }
+
+    h2 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #a29bfe;
+        margin: 2rem 0 0.8rem;
+        padding-bottom: 0.3rem;
+        border-bottom: 1px solid rgba(162, 155, 254, 0.2);
+    }
+
+    h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #c0b8ff;
+        margin: 1.5rem 0 0.5rem;
+    }
+
+    h4 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #ddd;
+        margin: 1rem 0 0.3rem;
+    }
+
+    h5, h6 {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #bbb;
+        margin: 0.8rem 0 0.3rem;
+    }
+
+    p { margin: 0.6rem 0; color: #ccc; }
+
+    blockquote {
+        background: rgba(108, 92, 231, 0.1);
+        border-left: 4px solid #6C5CE7;
+        padding: 0.8rem 1.2rem;
+        margin: 1rem 0;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+        color: #bbb;
+    }
+
+    .code-block {
+        background: #111122;
+        border: 1px solid #2d2d5e;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 0.8rem 0;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+        line-height: 1.5;
+        color: #a0d0ff;
+    }
+
+    code.inline-code {
+        background: rgba(108, 92, 231, 0.15);
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85em;
+        color: #a29bfe;
+    }
+
+    .section-divider {
+        border: none;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(108, 92, 231, 0.3), transparent);
+        margin: 2rem 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.85rem;
+    }
+
+    th {
+        background: rgba(108, 92, 231, 0.15);
+        color: #a29bfe;
+        font-weight: 600;
+        padding: 0.5rem 0.8rem;
+        text-align: left;
+        border: 1px solid #2d2d5e;
+    }
+
+    td {
+        padding: 0.4rem 0.8rem;
+        border: 1px solid #2d2d5e;
+        color: #ccc;
+    }
+
+    tr:nth-child(even) td {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    ul, ol { margin: 0.5rem 0 0.5rem 1.5rem; }
+    li { margin: 0.2rem 0; color: #ccc; }
+
+    /* ═══════════════════════════════════════════════════
+       PAGE NUMBERS — Print & On-Screen
+       ═══════════════════════════════════════════════════ */
+
+    /* Print page numbers via CSS counter */
+    @page {
+        size: A4;
+        margin: 0.75in;
+        @bottom-center {
+            content: "Page " counter(page);
+            font-family: 'Inter', sans-serif;
+            font-size: 8pt;
+            color: #999;
+        }
+    }
+
+    @page :first {
+        @bottom-center {
+            content: none;
+        }
+    }
+
+    @media print {
+        body { background: white; color: #333; padding: 0; font-size: 10pt; }
+        body::after { display: none !important; }
+        h1, h2, h3 { -webkit-text-fill-color: initial; background: none; color: #6C5CE7; }
+        p, li, td { color: #444; }
+        .code-block { background: #f5f5ff; border-color: #ddd; color: #333; }
+        table th { background: #eee; color: #333; }
+        table td, table th { border-color: #ddd; }
+        blockquote { background: #f8f6ff; border-left-color: #6C5CE7; color: #555; }
+        a { color: #6C5CE7; text-decoration: none; }
+        .page-indicator { display: none !important; }
+    }
+
+    /* On-screen page indicator — bottom-right floating bar */
+    .page-indicator {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(108, 92, 231, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        z-index: 9999;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        transform: translateY(4px);
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .page-indicator.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .page-indicator .page-sep {
+        color: rgba(255,255,255,0.4);
+        margin: 0 4px;
+    }
+
+    .page-indicator .page-total {
+        color: rgba(255,255,255,0.6);
+    }
+
+    /* Section label in indicator */
+    .page-indicator .page-section {
+        display: block;
+        font-size: 0.65rem;
+        font-family: 'Inter', sans-serif;
+        color: rgba(255,255,255,0.7);
+        text-align: center;
+        margin-top: 2px;
+        letter-spacing: 0.3px;
+    }
+
+
+</style>
+</head>
+<body>
+
+<!-- Floating page number indicator -->
+<div id="page-indicator" class="page-indicator">
+    <span id="page-current">1</span>
+    <span class="page-sep">/</span>
+    <span id="page-total" class="page-total">...</span>
+    <span id="page-section" class="page-section">Loading...</span>
+</div>
+<h1 id='cloudoptima-master-technical-guide'>☁️ CloudOptima — Master Technical Guide</h1>
+
+<blockquote>**A Comprehensive Reference for Architects, Engineers, and Researchers**</blockquote>
+<blockquote></blockquote>
+<blockquote>*"Explain every line of code, every model choice, every algorithm, every technique — and why we chose each one over alternatives."*</blockquote>
+
+<hr class="section-divider">
+
+<p><strong>Version:</strong> 1.1.0</p>
+<p><strong>Author:</strong> CloudOptima Collaboration Team (5 members)</p>
+<p><strong>Audience:</strong> Microsoft Industry-Student Collaboration Team</p>
+<p><strong>Last Updated:</strong> July 2026</p>
+
+<hr class="section-divider">
+
+<h2 id='table-of-contents'>Table of Contents</h2>
+
+<ol>
+<li><a href="#1-executive-summary">Executive Summary</a></li>
+<li><a href="#2-system-architecture-overview">System Architecture Overview</a></li>
+<li><a href="#3-data-model-deep-dive">Data Model Deep Dive</a></li>
+<li><a href="#4-agent-architecture--system-prompts">Agent Architecture & System Prompts</a></li>
+<li><a href="#5-multi-provider-llm-client">Multi-Provider LLM Client</a></li>
+<li><a href="#6-pydantic-validation-engine">Pydantic Validation Engine</a></li>
+<li><a href="#7-conflict-detection--arbitration">Conflict Detection & Arbitration</a></li>
+<li><a href="#8-session-orchestrator">Session Orchestrator</a></li>
+<li><a href="#9-azure-pricing-engine">Azure Pricing Engine</a></li>
+<li><a href="#10-compliance-knowledge-base--rag">Compliance Knowledge Base & RAG</a></li>
+<li><a href="#11-llm-response-cache">LLM Response Cache</a></li>
+<li><a href="#12-observability-system">Observability System</a></li>
+<li><a href="#13-health-check-system">Health Check System</a></li>
+<li><a href="#14-input-sanitization--security">Input Sanitization & Security</a></li>
+<li><a href="#15-error-tracking-with-sentry">Error Tracking with Sentry</a></li>
+<li><a href="#16-configuration-management">Configuration Management</a></li>
+<li><a href="#17-dashboard-streamlit-ui">Dashboard (Streamlit UI)</a></li>
+<li><a href="#18-testing-strategy">Testing Strategy</a></li>
+<li><a href="#19-deployment-architecture">Deployment Architecture</a></li>
+<li><a href="#20-why-multi-agent--a-comparative-analysis">Why Multi-Agent? — A Comparative Analysis</a></li>
+<li><a href="#21-design-decisions-full-trade-off-analysis">Design Decisions: Full Trade-off Analysis</a></li>
+<li><a href="#22-performance-benchmarks">Performance Benchmarks</a></li>
+<li><a href="#23-appendix-complete-file-reference">Appendix: Complete File Reference</a></li>
+<li><a href="#24-team-onboarding-guide">Team Onboarding Guide</a></li>
+<li><a href="#25-roadmap-milestones">Roadmap &amp; Milestones</a></li>
+<li><a href="#26-microsoft-integration-points">Microsoft Integration Points</a></li>
+<li><a href="#27-known-limitations-technical-debt">Known Limitations &amp; Technical Debt</a></li>
+<li><a href="#28-team-workflow-git-strategy">Team Workflow &amp; Git Strategy</a></li>
+</ol>
+
+
+<hr class="section-divider">
+
+<h2 id='1-executive-summary'>1. Executive Summary</h2>
+
+<h3 id='1-1-what-is-cloudoptima'>1.1 What Is CloudOptima?</h3>
+
+<p>CloudOptima is a <strong>multi-agent AI system</strong> that simulates a panel of five cloud infrastructure experts to design, cost, secure, and validate Azure architectures. A user describes their infrastructure needs in plain English, and five specialized AI agents (Architect, Cost Analyst, Security Engineer, Compliance Officer, and Judge) analyze the requirements, produce domain-specific assessments, detect conflicts between their recommendations, and resolve those conflicts through structured arbitration.</p>
+
+<h3 id='1-2-high-level-architecture'>1.2 High-Level Architecture</h3>
+
+<pre class="code-block"><code class="language-">User Input (Plain Language)
+        │
+        ▼
+┌──────────────────────────────────────────────────────────────┐
+│                    Streamlit Dashboard                       │
+│  ┌─────────┐  ┌──────────────┐  ┌─────────────────────────┐ │
+│  │  Form   │→ │  Progress    │→ │  Results Display        │ │
+│  │  Input  │  │  Streaming   │  │  (Tabs, Json, Artifacts)│ │
+│  └────┬────┘  └──────┬───────┘  └─────────────────────────┘ │
+└───────┼──────────────┼──────────────────────────────────────┘
+        │              │ (callbacks)
+        ▼              ▼
+┌──────────────────────────────────────────────────────────────┐
+│                   Orchestrator Layer                         │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  Session Manager │ Conflict Detector │ Artifact Gen  │   │
+│  │  Callback Hooks  │ Observability     │               │   │
+│  └─────┬──────┬──────┬──────┬──────┬────────────────────┘   │
+└────────┼──────┼──────┼──────┼──────┼────────────────────────┘
+         │      │      │      │      │
+    ┌────▼──┐ ┌▼─────┐┌▼────┐┌▼─────┐┌▼──────────┐
+    │Archit │ │Cost  ││Sec  ││Comp  ││  Judge    │
+    │-ecture│ │Anal. ││urity││liance││ (Arbitra- │
+    │       │ │      ││     ││      ││  tor)     │
+    └───────┘ └──────┘└─────┘└──────┘└───────────┘
+         │         │       │       │
+         └─────────┴───┬───┴───────┘
+                       │
+              ┌────────▼────────┐
+              │    5 Artifacts   │
+              │ IaC / Cost /    │
+              │ Compliance /    │
+              │ Rationale       │
+              └─────────────────┘</code></pre>
+
+<h3 id='1-3-key-differentiators'>1.3 Key Differentiators</h3>
+
+<table><thead><tr><th>CloudOptima</th><th>Traditional Cloud Design Tools</th><th>Other AI Architecture Tools</th></tr></thead><tbody>
+<tr><td>Multi-agent adversarial arbitration</td><td>Single-expert recommendation</td><td>Single LLM response</td></tr>
+<tr><td>Conflict detection across 6 agent pairs</td><td>Only cost or only security</td><td>No cross-domain validation</td></tr>
+<tr><td>Pydantic-validated structured outputs</td><td>Free-form text descriptions</td><td>Unvalidated JSON</td></tr>
+<tr><td>RAG-enhanced compliance checking</td><td>Static rulebooks</td><td>Model's training data only</td></tr>
+<tr><td>Live Azure pricing via public API</td><td>Manual price lookup</td><td>Estimated or outdated prices</td></tr>
+<tr><td>Disk-persisted LLM response cache</td><td>No caching</td><td>Per-request only</td></tr>
+<tr><td>Full observability (trace + audit + metrics)</td><td>No observability</td><td>Basic logging</td></tr>
+<tr><td>Human approval gate before IaC deployment</td><td>Direct deployment</td><td>No safety checks</td></tr>
+</tbody></table>
+
+
+<hr class="section-divider">
+
+<h2 id='2-system-architecture-overview'>2. System Architecture Overview</h2>
+
+<h3 id='2-1-module-map'>2.1 Module Map</h3>
+
+<pre class="code-block"><code class="language-">project_root/
+├── dashboard.py                 # Streamlit entry point
+├── run.py                       # CLI/API entry point
+├── src/
+│   ├── config.py                # Pydantic settings (env vars)
+│   ├── core/
+│   │   ├── models.py            # All data models (Session, AgentTurn, etc.)
+│   │   ├── agent_base.py        # BaseAgent class + system prompts
+│   │   ├── agent_schemas.py     # Pydantic validation schemas per agent
+│   │   ├── orchestrator.py      # Workflow orchestration engine
+│   │   ├── nvidia_client.py     # Mock/demo client (instant responses)
+│   │   ├── llm_client.py        # Multi-provider LLM abstraction
+│   │   ├── llm_cache.py         # SHA256-hashed, disk-persisted cache
+│   │   ├── azure_prices_api.py  # Live Azure Retail Prices API client
+│   │   ├── azure_pricing.py     # Static pricing fallback database
+│   │   ├── compliance_rules.py  # Structured compliance knowledge base
+│   │   ├── health.py            # Health check registry pattern
+│   │   ├── sanitize.py          # Input sanitization &amp; XSS prevention
+│   │   ├── sentry.py            # Sentry error tracking integration
+│   │   └── observability.py     # Tracer, AuditLogger, MetricsCollector
+│   └── agents/                   # Extensible agent package
+├── tests/                        # 205+ tests across 11 test files
+├── deploy/                       # Azure deployment scripts
+└── docs/                         # Documentation</code></pre>
+
+<h3 id='2-2-data-flow-end-to-end'>2.2 Data Flow (End-to-End)</h3>
+
+<pre class="code-block"><code class="language-">Step 1: User submits form in Streamlit dashboard
+Step 2: Input sanitized (sanitize.py) → prompt assembled
+Step 3: Orchestrator.create_session() → Session with UUID
+Step 4: Orchestrator.run_all_agents() sequentially:
+    a. Architect Agent → compute/storage/network/data design
+    b. Cost Analyst Agent → pricing, RI optimization, conflicts
+    c. Security Engineer → vulnerability assessment, conflicts
+    d. Compliance Officer → regulatory check, conflicts
+Step 5: Each agent output validated via Pydantic schema
+Step 6: Orchestrator._detect_conflicts() → 6 agent pairs checked
+Step 7: Orchestrator.run_judge() → Judge arbitrates conflicts
+Step 8: Orchestrator.generate_artifacts() → 5 output artifacts
+Step 9: Orchestrator.complete_session() → trace + audit export
+Step 10: Results rendered in dashboard tabs with callbacks</code></pre>
+
+<h3 id='2-3-session-state-machine'>2.3 Session State Machine</h3>
+
+<p>The session lifecycle has 12 distinct states, each with strict transitions:</p>
+
+<pre class="code-block"><code class="language-">PENDING
+  │
+  ▼
+REQUIREMENT_EXTRACTED
+  │
+  ▼
+AGENTS_RUNNING
+  │ (all 4 specialist agents complete)
+  ▼
+AGENTS_COMPLETE
+  │
+  ▼
+ARBITRATING
+  │ (Judge resolves conflicts)
+  ▼
+ARBITRATION_COMPLETE
+  │
+  ▼
+ARTIFACTS_GENERATED
+  │
+  ├──► COMPLETED
+  ├──► FAILED
+  ├──► HUMAN_APPROVAL_PENDING
+  │     ├──► HUMAN_APPROVED
+  │     └──► HUMAN_REJECTED
+  └──► FAILED</code></pre>
+
+<p><strong>Why this state machine?</strong> We designed it to track exactly where in the pipeline an error occurred. During development, the most common issue was JSON decoding failures from LLM outputs. Having <code class='inline-code'>AGENTS_RUNNING</code> → <code class='inline-code'>AGENTS_COMPLETE</code> → <code class='inline-code'>ARBITRATING</code> → <code class='inline-code'>ARBITRATION_COMPLETE</code> allowed us to see exactly which stage failed.</p>
+
+<hr class="section-divider">
+
+<h2 id='3-data-model-deep-dive'>3. Data Model Deep Dive</h2>
+
+<h3 id='3-1-models-overview-src-core-models-py'>3.1 Models Overview (src/core/models.py)</h3>
+
+<p>All data models use <strong>Pydantic BaseModel</strong> (v2). We chose Pydantic over:</p>
+<ul>
+<li><strong>dataclasses</strong>: No built-in validation, no serialization methods</li>
+<li><strong>attrs</strong>: Less ecosystem support; Pydantic has broader adoption</li>
+<li><strong>Plain dicts</strong>: No type safety, no IDE autocomplete, runtime errors</li>
+<li><strong>marshmallow</strong>: More verbose; requires separate schema classes</li>
+</ul>
+
+
+<p>Pydantic gives us:</p>
+<ol>
+<li><strong>Validation at instantiation</strong>: Type errors caught immediately, not at runtime</li>
+<li><strong>Serialization/deserialization</strong>: <code class='inline-code'>model_dump()</code> and <code class='inline-code'>model_validate()</code> built-in</li>
+<li><strong>JSON Schema generation</strong>: Automatic OpenAPI-compatible schemas</li>
+<li><strong>Nested model validation</strong>: <code class='inline-code'>ArchitectResponse.architecture.compute.recommendation</code> must be a string</li>
+<li><strong>Default factories</strong>: <code class='inline-code'>Field(default_factory=lambda: _unique_id("session_"))</code> for auto-ID generation</li>
+</ol>
+
+
+<h3 id='3-2-core-entities'>3.2 Core Entities</h3>
+
+<pre class="code-block"><code class="language-python">class Session(BaseModel):
+    """A single design session tracking one user request through its lifecycle."""
+    id: str = Field(default_factory=lambda: _unique_id("session_"))
+    status: SessionStatus = SessionStatus.PENDING
+    requirement: Optional[Requirement] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    user_id: str = "demo_user"
+    region: str = ""
+    duration_seconds: Optional[float] = None</code></pre>
+
+<p><strong>Why UUIDs with prefix?</strong> Earlier versions used datetime-based IDs (<code class='inline-code'>session_20240725_143022</code>), which caused collisions when sessions were created rapidly (common during testing). The current approach uses <code class='inline-code'>uuid.uuid4().hex[:12]</code> — first 12 hex characters of a UUID4 — prefixed with a human-readable label. This gives:</p>
+<ul>
+<li><strong>Uniqueness</strong>: 16^12 = 2.8 × 10^14 possible values per prefix</li>
+<li><strong>Human readability</strong>: <code class='inline-code'>session_a7b7d2c61fc0</code> is clearly a session ID</li>
+<li><strong>No sequential enumeration</strong>: Attackers cannot guess session IDs</li>
+</ul>
+
+
+<p><strong>Why <code class='inline-code'>datetime.now(timezone.utc)</code> instead of <code class='inline-code'>datetime.utcnow()</code>?</strong> The latter is deprecated in Python 3.12+. Using <code class='inline-code'>timezone.utc</code> at creation time ensures timezone-aware datetimes, preventing:</p>
+<ul>
+<li>Ambiguity between UTC and local time</li>
+<li>Comparison errors in sorted lists</li>
+<li>Serialization issues (naive datetimes don't have timezone info)</li>
+</ul>
+
+
+<h3 id='3-3-the-agenttype-enum'>3.3 The AgentType Enum</h3>
+
+<pre class="code-block"><code class="language-python">class AgentType(str, Enum):
+    ARCHITECT = "architect"
+    COST = "cost"
+    SECURITY = "security"
+    COMPLIANCE = "compliance"
+    JUDGE = "judge"</code></pre>
+
+<p><strong>Why <code class='inline-code'>str, Enum</code> instead of plain Enum?</strong> This is a <code class='inline-code'>StrEnum</code> — the values are strings, enabling:</p>
+<ul>
+<li>Direct comparison with string config values: <code class='inline-code'>agent_type == "architect"</code></li>
+<li>JSON serialization without custom encoders</li>
+<li>Database storage as VARCHAR</li>
+</ul>
+
+
+<p><strong>Why these 5 agents specifically?</strong> The Azure Well-Architected Framework defines 5 pillars: Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency. Our agents map to:</p>
+<ul>
+<li><strong>Architect</strong> → Performance Efficiency + Operational Excellence</li>
+<li><strong>Cost Analyst</strong> → Cost Optimization</li>
+<li><strong>Security Engineer</strong> → Security</li>
+<li><strong>Compliance Officer</strong> → Reliability (regulatory compliance)</li>
+<li><strong>Judge</strong> → Cross-pillar arbitration</li>
+</ul>
+
+
+<p>This covers all 5 WAF pillars while keeping the agent count manageable. Each agent has a clearly bounded domain of expertise.</p>
+
+<h3 id='3-4-conflict-dimensions'>3.4 Conflict Dimensions</h3>
+
+<pre class="code-block"><code class="language-python">class ConflictDimension(str, Enum):
+    COST_VS_SECURITY = "cost_vs_security"
+    COST_VS_COMPLIANCE = "cost_vs_compliance"
+    SECURITY_VS_COMPLIANCE = "security_vs_compliance"
+    ARCHITECT_VS_COST = "architect_vs_cost"
+    ARCHITECT_VS_SECURITY = "architect_vs_security"
+    ARCHITECT_VS_COMPLIANCE = "architect_vs_compliance"</code></pre>
+
+<p><strong>Why these 6 pairs?</strong> With 4 specialist agents, there are C(4,2) = 6 possible conflict pairs. Each pair represents a real tension in cloud architecture:</p>
+
+<table><thead><tr><th>Pair</th><th>Real-World Tension</th></tr></thead><tbody>
+<tr><td>Cost ↔ Security</td><td>"Cheaper SKU" vs "Encryption at rest required"</td></tr>
+<tr><td>Cost ↔ Compliance</td><td>"Use cheapest storage" vs "Data must stay in-country"</td></tr>
+<tr><td>Security ↔ Compliance</td><td>"Our encryption standard" vs "Regional regulation standard"</td></tr>
+<tr><td>Architect ↔ Cost</td><td>"Best performance tier" vs "Budget constraints"</td></tr>
+<tr><td>Architect ↔ Security</td><td>"Open architecture for scalability" vs "Hardened security posture"</td></tr>
+<tr><td>Architect ↔ Compliance</td><td>"Global service for consistency" vs "Local regulation mandates"</td></tr>
+</tbody></table>
+
+
+<p>We explicitly <strong>do not</strong> include the Judge in pairwise comparisons — the Judge resolves conflicts rather than creating them.</p>
+
+<h3 id='3-5-the-requirement-model'>3.5 The Requirement Model</h3>
+
+<pre class="code-block"><code class="language-python">class Requirement(BaseModel):
+    raw_text: str                    # Original user input
+    workload_description: str = ""   # Extracted workload type
+    target_region: str = ""          # Azure region
+    compliance_frameworks: list[str] = Field(default_factory=list)
+    estimated_scale: str = ""        # small/medium/large/enterprise
+    key_services: list[str] = Field(default_factory=list)
+    special_constraints: list[str] = Field(default_factory=list)</code></pre>
+
+<p><strong>Why not extract entities via NLP?</strong> Initially, we considered using spaCy or a dedicated NER model to extract regions, services, and constraints from user text. We abandoned this because:</p>
+<ol>
+<li><strong>Latency</strong>: Adding an NLP pipeline would add 500ms–2s per request with minimal benefit</li>
+<li><strong>Accuracy</strong>: LLMs already do this implicitly during the analysis</li>
+<li><strong>Complexity</strong>: Maintaining NLP models adds deployment and dependency costs</li>
+<li><strong>Cost</strong>: Free alternatives (spaCy) are large models; cloud NLP APIs cost money</li>
+</ol>
+
+
+<p>Instead, we use the form-based approach: users explicitly select region, compliance frameworks, and scale from dropdowns. This is faster, more accurate, and requires zero ML infrastructure.</p>
+
+<hr class="section-divider">
+
+<h2 id='4-agent-architecture-system-prompts'>4. Agent Architecture & System Prompts</h2>
+
+<h3 id='4-1-baseagent-class-src-core-agent_base-py'>4.1 BaseAgent Class (src/core/agent_base.py)</h3>
+
+<pre class="code-block"><code class="language-python">class BaseAgent:
+    def __init__(self, agent_type: AgentType, model: Optional[str] = None):
+        self.agent_type = agent_type
+        self.model = model
+        self.client = NVIDIAClient(model=model)
+        self.system_prompt = SYSTEM_PROMPTS[agent_type]</code></pre>
+
+<p><strong>Why a single BaseAgent instead of 5 separate classes?</strong> Two reasons:</p>
+
+<ol>
+<li><strong>Consistency</strong>: All agents follow the same lifecycle: build messages → call LLM → parse output → validate → return AgentTurn. Having separate classes would duplicate this logic 5 times.</li>
+</ol>
+
+
+<ol>
+<li><strong>Extensibility</strong>: Adding a 6th agent (e.g., "Sustainability Officer") requires only:</li>
+</ol>
+
+<ul>
+<li>1 new entry in <code class='inline-code'>AgentType</code> enum</li>
+<li>1 new system prompt in <code class='inline-code'>SYSTEM_PROMPTS</code></li>
+<li>1 new Pydantic schema in <code class='inline-code'>agent_schemas.py</code></li>
+<li>1 new registry entry in <code class='inline-code'>AGENT_RESPONSE_SCHEMAS</code></li>
+</ul>
+
+
+<p>That's ~50 lines total for a new agent. The BaseAgent handles execution automatically.</p>
+
+<p><strong>Why the <code class='inline-code'>model</code> parameter?</strong> Per-agent model overrides. During testing, we found that the Compliance Officer performs better with a larger model (more regulatory knowledge) while the Cost Analyst can use a smaller model (simple arithmetic). The <code class='inline-code'>Settings.get_agent_model()</code> method provides this:</p>
+
+<pre class="code-block"><code class="language-python">def get_agent_model(self, agent_type: str) -&gt; str:
+    override_map = {
+        "architect": self.architect_model,
+        "cost": self.cost_model,
+        "security": self.security_model,
+        "compliance": self.compliance_model,
+        "judge": self.judge_model,
+    }
+    return override_map.get(agent_type) or self.nvidia_model</code></pre>
+
+<p>This allows fine-grained cost/quality trade-offs without changing code.</p>
+
+<h3 id='4-2-system-prompt-design-philosophy'>4.2 System Prompt Design Philosophy</h3>
+
+<p>Each system prompt follows a structured format:</p>
+
+<ol>
+<li><strong>Role Definition</strong>: "You are an Azure Solutions Architect..."</li>
+<li><strong>Knowledge Boundary</strong>: What the agent knows and doesn't know</li>
+<li><strong>Output Schema</strong>: Exact JSON structure with field descriptions</li>
+<li><strong>Constraints</strong>: Nuance, disclaimers, prohibited behaviors</li>
+</ol>
+
+
+<h4 id='architect-prompt'>Architect Prompt</h4>
+
+<pre class="code-block"><code class="language-">"You are an Azure Solutions Architect... Follow the Azure Well-Architected Framework
+principles: Reliability, Security, Cost Optimization, Operational Excellence,
+Performance Efficiency."</code></pre>
+
+<p><strong>Why the Well-Architected Framework?</strong> It's Microsoft's canonical architecture methodology. Teaching the LLM to follow WAF principles ensures:</p>
+<ul>
+<li><strong>Industry alignment</strong>: The output matches what real Azure architects would produce</li>
+<li><strong>Measurable quality</strong>: Each recommendation can be traced to a WAF pillar</li>
+<li><strong>Audit trail</strong>: Compliance teams can verify output against recognized standards</li>
+</ul>
+
+
+<h4 id='cost-analyst-prompt'>Cost Analyst Prompt</h4>
+
+<pre class="code-block"><code class="language-">"You are an Azure FinOps / Cost Optimization Analyst... Be quantitative. Use realistic
+Azure pricing data. Flag any cost-inefficient recommendations."</code></pre>
+
+<p><strong>Why "conflicts_with_architect" as a first-class output field?</strong> We explicitly ask each non-architect agent to identify disagreements with the Architect's design. This:</p>
+<ol>
+<li><strong>Forces adversarial thinking</strong>: Compliance must explicitly say "Architect's GRS violates DPDP"</li>
+<li><strong>Structures conflict detection</strong>: The orchestrator parses <code class='inline-code'>conflicts_with_architect</code> to create <code class='inline-code'>Conflict</code> objects</li>
+<li><strong>Prevents silo thinking</strong>: No agent can ignore another agent's domain</li>
+</ol>
+
+
+<h4 id='compliance-officer-prompt-the-most-complex'>Compliance Officer Prompt — The Most Complex</h4>
+
+<p>This prompt is the longest because it contains:</p>
+
+<ol>
+<li><strong>Curated regulatory knowledge</strong>: 4 frameworks with specific sections</li>
+<li><strong>Knowledge boundary</strong>: "For regions not covered above, the system has a RAG engine..."</li>
+<li><strong>Disclaimer requirement</strong>: "Your output is DECISION SUPPORT, not legal advice"</li>
+<li><strong>Citation requirement</strong>: "Be specific about which regulation and section applies"</li>
+</ol>
+
+
+<p><strong>Why embed regulations directly instead of always using RAG?</strong> For the 4 most common frameworks (GDPR, HIPAA, DPDP, PDPL), we bake the knowledge into the prompt because:</p>
+<ul>
+<li><strong>Zero latency</strong>: No vector DB query needed</li>
+<li><strong>Guaranteed accuracy</strong>: No retrieval errors for well-known frameworks</li>
+<li><strong>Lower cost</strong>: RAG queries add API calls and token costs</li>
+<li><strong>Testable</strong>: The knowledge is static and verifiable in unit tests</li>
+</ul>
+
+
+<p>For less common regions, the RAG engine kicks in automatically.</p>
+
+<h4 id='judge-prompt-the-arbitration-engine'>Judge Prompt — The Arbitration Engine</h4>
+
+<pre class="code-block"><code class="language-">"You are the Judge in a multi-agent architecture panel... Your arbitration must be:
+1. TRACEABLE - Reference each agent's specific position
+2. EXPLAINABLE - Provide a clear rationale for each decision
+3. BALANCED - Give each agent's argument fair consideration
+4. BINARY - For each conflict, explicitly state which agent is overruled"</code></pre>
+
+<p><strong>Why binary resolution instead of compromise?</strong> In cloud architecture, many conflicts cannot be averaged:</p>
+<ul>
+<li>Data either stays in-region or it doesn't (binary)</li>
+<li>Data is either encrypted at rest or it isn't (binary)</li>
+<li>You either have 99.95% SLA or you don't (binary)</li>
+</ul>
+
+
+<p>Compromise positions often violate requirements. The binary approach forces the Judge to make a clear decision, which is more useful than a hedged recommendation.</p>
+
+<h3 id='4-3-why-these-prompts-are-effective'>4.3 Why These Prompts Are Effective</h3>
+
+<p>The prompts were refined through 50+ iterations. Key lessons:</p>
+
+<ol>
+<li><strong>Explicit JSON schemas work better than descriptions</strong>: "Output as JSON" produces malformed JSON; providing the exact structure with <code class='inline-code'>\\n</code> escapes produces valid JSON 95%+ of the time.</li>
+</ol>
+
+
+<ol>
+<li><strong>Negative examples help</strong>: The Judge prompt includes "Do NOT silently average conflicting positions" — this was added after early versions produced vague compromise recommendations.</li>
+</ol>
+
+
+<ol>
+<li><strong>Role priming matters</strong>: Starting with "You are an Azure Solutions Architect" (specific, credentialed) performs better than "You will design cloud infrastructure" (generic, task-oriented).</li>
+</ol>
+
+
+<ol>
+<li><strong>Knowledge boundaries prevent hallucination</strong>: The Compliance prompt explicitly says "This output is decision support for a design exercise, not legal advice" — this disclaimer appears in every response, preventing user over-reliance on potentially incorrect compliance suggestions.</li>
+</ol>
+
+
+<hr class="section-divider">
+
+<h2 id='5-multi-provider-llm-client'>5. Multi-Provider LLM Client</h2>
+
+<h3 id='5-1-architecture-src-core-llm_client-py'>5.1 Architecture (src/core/llm_client.py)</h3>
+
+<pre class="code-block"><code class="language-">LLMClient (ABC)
+  ├── NvidiaClient      (OpenAI-compatible — default)
+  ├── OpenAIClient      (GPT-4o / GPT-4-turbo)
+  ├── AnthropicClient   (Claude 3 Opus / Sonnet)
+  ├── GoogleClient      (Gemini 1.5 Pro / Flash)
+  └── DeepSeekClient    (DeepSeek Chat / V2)</code></pre>
+
+<h3 id='5-2-why-nvidia-nims-as-default'>5.2 Why NVIDIA NIMs as Default?</h3>
+
+<p><strong>NVIDIA NIMs</strong> (NVIDIA Inference Microservices) is the default provider for three reasons:</p>
+
+<table><thead><tr><th>Factor</th><th>NVIDIA NIMs</th><th>OpenAI</th><th>Anthropic</th><th>Google</th></tr></thead><tbody>
+<tr><td><strong>Free tier</strong></td><td>✅ Free credits for new users</td><td>✅ $5 free credits</td><td>❌ No free tier</td><td>✅ $300 free credits</td></tr>
+<tr><td><strong>Latency</strong></td><td>~2-5s per call</td><td>~3-8s per call</td><td>~5-15s per call</td><td>~3-10s per call</td></tr>
+<tr><td><strong>Rate limits</strong></td><td>1,000 RPM (generous)</td><td>500 RPM (paid)</td><td>50 RPM (paid)</td><td>60 RPM (free)</td></tr>
+<tr><td><strong>OpenAI-compatible</strong></td><td>✅ Yes (drop-in)</td><td>✅ Native</td><td>❌ Different API</td><td>❌ Different API</td></tr>
+<tr><td><strong>Open-source models</strong></td><td>✅ LLaMA, Mistral, etc.</td><td>❌ Proprietary only</td><td>❌ Claude only</td><td>❌ Gemini only</td></tr>
+<tr><td><strong>HPC infrastructure</strong></td><td>✅ NVIDIA GPU clusters</td><td>❌ Azure/AWS</td><td>❌ AWS</td><td>❌ Google Cloud</td></tr>
+</tbody></table>
+
+
+<p>The OpenAI-compatible API is the key advantage — we can test with NVIDIA NIMs and switch to OpenAI or DeepSeek with a single config change.</p>
+
+<h3 id='5-3-provider-abstraction'>5.3 Provider Abstraction</h3>
+
+<pre class="code-block"><code class="language-python">class LLMClient(ABC):
+    @abstractmethod
+    def _setup_client(self): ...
+    @abstractmethod
+    def chat_completion(self, messages: list[dict], **kwargs) -&gt; str: ...
+    @abstractmethod
+    def _mock_response(self, messages: list[dict]) -&gt; str: ...</code></pre>
+
+<p><strong>Why the ABC pattern instead of duck typing?</strong> Each provider has a fundamentally different client setup:</p>
+<ul>
+<li><strong>OpenAI-compatible</strong>: <code class='inline-code'>OpenAI(base_url=..., api_key=...)</code></li>
+<li><strong>Anthropic</strong>: <code class='inline-code'>anthropic.Anthropic(api_key=...)</code> with different message format</li>
+<li><strong>Google</strong>: <code class='inline-code'>google.generativeai.GenerativeModel(...)</code> with completely different interface</li>
+</ul>
+
+
+<p>The ABC enforces that all providers implement the minimum interface (<code class='inline-code'>chat_completion</code>), while allowing provider-specific initialization in <code class='inline-code'>_setup_client</code>.</p>
+
+<h3 id='5-4-provider-factory'>5.4 Provider Factory</h3>
+
+<pre class="code-block"><code class="language-python">_PROVIDER_REGISTRY: dict[LLMProvider, type[LLMClient]] = {
+    LLMProvider.NVIDIA: NvidiaClient,
+    LLMProvider.OPENAI: OpenAIClient,
+    LLMProvider.ANTHROPIC: AnthropicClient,
+    LLMProvider.GOOGLE: GoogleClient,
+    LLMProvider.DEEPSEEK: DeepSeekClient,
+}
+
+def create_llm_client(provider=None, config=None):
+    # Returns the correct client based on env or argument</code></pre>
+
+<p><strong>Why a registry instead of if/elif chains?</strong> The registry pattern allows:</p>
+<ol>
+<li><strong>Runtime registration</strong>: <code class='inline-code'>register_provider("custom", CustomClient)</code> adds new providers without modifying core code</li>
+<li><strong>Swappable implementations</strong>: The Dashboard uses the default; tests can register mock providers</li>
+<li><strong>Lazy discovery</strong>: Future providers (Mistral AI, Cohere, AI21) can be added as plugins</li>
+</ol>
+
+
+<h3 id='5-5-retry-logic-nvidia-client'>5.5 Retry Logic (NVIDIA Client)</h3>
+
+<pre class="code-block"><code class="language-python">@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    retry=retry_if_exception_type((httpx.TimeoutException, httpx.RemoteProtocolError)),
+)
+def _call():
+    response = self._client.chat.completions.create(...)</code></pre>
+
+<p><strong>Why tenacity instead of custom retry logic?</strong> Building retry logic manually is error-prone:</p>
+<ul>
+<li><strong>Exponential backoff</strong>: Custom implementations often use linear or fixed delays</li>
+<li><strong>Exception filtering</strong>: Easy to accidentally retry on 4xx errors (bad requests)</li>
+<li><strong>Jitter</strong>: Preventing thundering herd requires random jitter, which is easy to get wrong</li>
+<li><strong>Testing</strong>: Mocking retry behavior is harder with custom code</li>
+</ul>
+
+
+<p>Tenacity handles all these correctly and adds observability hooks.</p>
+
+<p><strong>Why 3 attempts?</strong> From Azure best practices and NVIDIA's documentation, transient failures (rate limits, network blips) typically resolve within 10 seconds. With exponential backoff (2s → 4s → 8s), 3 attempts cover ~14 seconds total — sufficient for transient failures without excessive wait.</p>
+
+<h3 id='5-6-message-format-conversion'>5.6 Message Format Conversion</h3>
+
+<p>Each provider requires different message formats:</p>
+
+<table><thead><tr><th>Provider</th><th>System Message</th><th>User Message</th><th>Assistant Message</th></tr></thead><tbody>
+<tr><td>NVIDIA/OpenAI/DeepSeek</td><td><code class='inline-code'>{"role": "system", ...}</code></td><td><code class='inline-code'>{"role": "user", ...}</code></td><td><code class='inline-code'>{"role": "assistant", ...}</code></td></tr>
+<tr><td>Anthropic</td><td>Separate <code class='inline-code'>system</code> param</td><td><code class='inline-code'>{"role": "user", ...}</code></td><td><code class='inline-code'>{"role": "assistant", ...}</code></td></tr>
+<tr><td>Google</td><td><code class='inline-code'>system_instruction</code> param</td><td><code class='inline-code'>{"role": "user", "parts": [...]}</code></td><td><code class='inline-code'>{"role": "model", "parts": [...]}</code></td></tr>
+</tbody></table>
+
+
+<p>The conversion is handled in each client's <code class='inline-code'>chat_completion</code> method. This is the main reason we need separate client classes — the message format conversion cannot be abstracted cleanly into a shared base class.</p>
+
+<hr class="section-divider">
+
+<h2 id='6-pydantic-validation-engine'>6. Pydantic Validation Engine</h2>
+
+<h3 id='6-1-why-pydantic-validation-src-core-agent_schemas-py'>6.1 Why Pydantic Validation? (src/core/agent_schemas.py)</h3>
+
+<p>This module was born from a critical bug: <strong>LLM outputs were producing malformed JSON ~20% of the time</strong>, causing the entire session to fail. We needed a robust parsing pipeline that:</p>
+
+<ol>
+<li>Handles malformed JSON gracefully (never crashes)</li>
+<li>Extracts JSON from markdown code fences</li>
+<li>Validates structure against expected schemas</li>
+<li>Fills missing fields with defaults</li>
+<li>Logs errors for debugging without failing the session</li>
+</ol>
+
+
+<h3 id='6-2-json-extraction-pipeline'>6.2 JSON Extraction Pipeline</h3>
+
+<pre class="code-block"><code class="language-python">def extract_json_from_llm_output(output_text: str) -&gt; str:
+    # 1. Try ```json ... ```  (most common LLM output format)
+    if "```json" in output_text:
+        return output_text.split("```json")[1].split("```")[0].strip()
+    
+    # 2. Try ``` ... ``` (plain code fence)
+    if "```" in output_text:
+        return output_text.split("```")[1].split("```")[0].strip()
+    
+    # 3. Try to find a JSON object anywhere in the text
+    match = re.search(r"\{.*\}", output_text, re.DOTALL)
+    if match:
+        return match.group()
+    
+    # 4. Last resort: return as-is
+    return output_text.strip()</code></pre>
+
+<p><strong>Why this order?</strong> LLMs typically output JSON in <code class='inline-code'>\\</code>\<code class='inline-code'>\\</code>\<code class='inline-code'>json ... \\</code>\<code class='inline-code'>\\</code>\` blocks. The extraction tries the most specific pattern first (exact match) and falls back to less specific patterns. This gives us:</p>
+<ul>
+<li>~95% success on well-formatted LLM output</li>
+<li>~80% on poorly formatted output</li>
+<li>Never crashes (last resort returns raw text)</li>
+</ul>
+
+
+<p><strong>Why not use a JSON repair library like <code class='inline-code'>json-repair</code>?</strong> We evaluated <code class='inline-code'>json-repair</code> but found:</p>
+<ul>
+<li>Additional dependency (maintenance burden)</li>
+<li>50-200ms per repair call (latency cost)</li>
+<li>Still fails on ~10% of cases</li>
+<li>Pydantic defaults already handle missing fields</li>
+</ul>
+
+
+<h3 id='6-3-five-pydantic-schemas'>6.3 Five Pydantic Schemas</h3>
+
+<p>Each agent type has a dedicated response schema:</p>
+
+<pre class="code-block"><code class="language-python">class ArchitectResponse(BaseModel):
+    architecture: ArchitectureDesign = Field(default_factory=ArchitectureDesign)
+    summary: str = ""
+
+class CostResponse(BaseModel):
+    analysis: CostAnalysis = Field(default_factory=CostAnalysis)
+
+class SecurityResponse(BaseModel):
+    security_assessment: SecurityAssessment = Field(default_factory=SecurityAssessment)
+
+class ComplianceResponse(BaseModel):
+    compliance_assessment: ComplianceAssessment = Field(default_factory=ComplianceAssessment)
+
+class JudgeResponse(BaseModel):
+    arbitration: Arbitration = Field(default_factory=Arbitration)
+    disclaimer: str = ""</code></pre>
+
+<p><strong>Why nested schemas instead of flat dicts?</strong> The Architect response has 4 nested levels: <code class='inline-code'>architecture.compute.recommendation</code>. With nested Pydantic models, each level has its own validation:</p>
+
+<pre class="code-block"><code class="language-python">class ComputeRecommendation(BaseModel):
+    recommendation: str = ""
+    justification: str = ""
+    alternatives: list[str] = Field(default_factory=list)</code></pre>
+
+<p>If the LLM returns <code class='inline-code'>{"architecture": {"compute": "AKS"}}</code> (a string instead of a dict), Pydantic correctly returns the default <code class='inline-code'>ComputeRecommendation()</code> with all empty fields — versus a flat dict approach that would cause KeyError when accessing <code class='inline-code'>result["compute"]["justification"]</code>.</p>
+
+<h3 id='6-4-validation-function'>6.4 Validation Function</h3>
+
+<pre class="code-block"><code class="language-python">def validate_agent_output(output_text: str, agent_type: AgentType) -&gt; dict:
+    schema = AGENT_RESPONSE_SCHEMAS.get(agent_type)
+    if not schema:
+        return {"raw_response": output_text}
+
+    try:
+        json_str = extract_json_from_llm_output(output_text)
+        parsed = json.loads(json_str)
+        validated = schema.model_validate(parsed)
+        return validated.model_dump(exclude_none=False)
+    except json.JSONDecodeError as e:
+        logger.warning(f"JSON decode failed for {agent_type}: {e}")
+        return {"raw_response": output_text, "_error": f"JSON decode failed: {e}"}
+    except ValidationError as e:
+        logger.warning(f"Pydantic validation failed for {agent_type}: {e}")
+        return {"raw_response": output_text, "_error": f"Validation failed: {e}"}
+    except Exception as e:
+        return {"raw_response": output_text, "_error": str(e)}</code></pre>
+
+<p><strong>Why never crash?</strong> A validation failure should never bring down the entire session. The graceful degradation model:</p>
+<ol>
+<li>Logs the error (for debugging)</li>
+<li>Returns a dict with <code class='inline-code'>_error</code> key (for dashboard display)</li>
+<li>Continues the session (so partial results are still visible)</li>
+<li>The Judge sees the error and can account for missing agent output</li>
+</ol>
+
+
+<h3 id='6-5-conflict-extraction-from-validated-output'>6.5 Conflict Extraction from Validated Output</h3>
+
+<pre class="code-block"><code class="language-python">def extract_conflicts_from_validated(validated_output: dict, agent_type: AgentType) -&gt; list[dict]:
+    if agent_type == AgentType.ARCHITECT:
+        return []  # Architect doesn't report conflicts — they're the baseline
+    
+    if agent_type == AgentType.COST:
+        analysis = validated_output.get("analysis", {})
+        return analysis.get("conflicts_with_architect", [])
+    
+    # ...similar for Security and Compliance</code></pre>
+
+<p><strong>Why only non-Architect agents report conflicts?</strong> The Architect's design is the baseline proposal. Every other agent evaluates it against their domain and reports disagreements. This asymmetry:</p>
+<ol>
+<li><strong>Simplifies prompts</strong>: Cost, Security, and Compliance agents only need to report conflicts with the Architect, not with each other</li>
+<li><strong>Reduces output size</strong>: Each agent would need 3x more conflict reporting if pairwise across all agents</li>
+<li><strong>Natural interaction</strong>: In real architecture reviews, the initial design is reviewed against each domain independently</li>
+</ol>
+
+
+<p>The orchestrator constructs the 6 conflict pairs from these single-perspective reports.</p>
+
+<hr class="section-divider">
+
+<h2 id='7-conflict-detection-arbitration'>7. Conflict Detection & Arbitration</h2>
+
+<h3 id='7-1-the-adversarial-arbitration-pattern'>7.1 The Adversarial Arbitration Pattern</h3>
+
+<p><strong>Why adversarial instead of consensus?</strong> In real cloud architecture, the best designs come from rigorous debate, not polite agreement:</p>
+
+<table><thead><tr><th>Aspect</th><th>Adversarial (CloudOptima)</th><th>Consensus (Alternatives)</th></tr></thead><tbody>
+<tr><td><strong>Conflict handling</strong></td><td>Explicitly detected, logged, resolved</td><td>Silently averaged or voted</td></tr>
+<tr><td><strong>Decision quality</strong></td><td>Binary resolution (pro + con documented)</td><td>Compromise position (may satisfy no one)</td></tr>
+<tr><td><strong>Traceability</strong></td><td>Every conflict has documented rationale</td><td>No trace of disagreement exists</td></tr>
+<tr><td><strong>Edge cases</strong></td><td>Handled explicitly by Judge</td><td>Lost in averaging</td></tr>
+<tr><td><strong>Accountability</strong></td><td>Each agent advocates for its domain</td><td>Responsibility diffused across all agents</td></tr>
+</tbody></table>
+
+
+<h3 id='7-2-conflict-detection-algorithm'>7.2 Conflict Detection Algorithm</h3>
+
+<pre class="code-block"><code class="language-">Input: 4 validated agent outputs (Architect, Cost, Security, Compliance)
+Output: 0-6 Conflict objects
+
+For each of 6 agent pairs:
+    1. Extract conflicts_with_architect[] from each agent's output
+    2. Combine both agents' reports into one conflict summary
+    3. Create Conflict object with:
+       - dimension (e.g., "cost_vs_compliance")
+       - agent_a_position (3 sample items from Cost)
+       - agent_b_position (3 sample items from Compliance)
+       - summary (human-readable description)</code></pre>
+
+<p><strong>Why limit to 3 sample items?</strong> The <code class='inline-code'>agent_a_position</code> and <code class='inline-code'>agent_b_position</code> fields are used by the Judge for context. An agent might report 10+ conflicts, but passing all 10 to the Judge exceeds token limits. We truncate to 3 most relevant items — the Judge can still understand the tension without seeing every detail.</p>
+
+<h3 id='7-3-judge-arbitration-logic'>7.3 Judge Arbitration Logic</h3>
+
+<pre class="code-block"><code class="language-python"># Build context for Judge
+context = []
+for turn in turns:
+    context.append({"role": "user", "content": f"[{agent_type}] Output: {output[:2000]}"})
+
+if conflicts:
+    conflict_summary = json.dumps([{
+        "dimension": c.dimension,
+        "agents": [c.agent_a_type, c.agent_b_type],
+        "summary": c.summary,
+    } for c in conflicts], indent=2)
+    context.append({"role": "user", "content": f"CONFLICTS TO RESOLVE: {conflict_summary}"})</code></pre>
+
+<p><strong>Why 2000-char truncation on agent outputs?</strong> The total context (4 agent outputs + conflicts list) must fit within the LLM's context window. For Mistral Small (32K context), limiting each agent to 2000 characters plus a compressed conflicts summary keeps the total under 15K tokens, leaving room for system prompt and response.</p>
+
+<p><strong>Why <code class='inline-code'>json.dumps()</code> for conflicts?</strong> The LLM processes structured JSON more reliably than narrative text for structured data. When conflicts are listed as JSON, the Judge can parse them programmatically in its reasoning. When conflicts are described in prose, the Judge often misses details.</p>
+
+<h3 id='7-4-arbitration-decision-structure'>7.4 Arbitration Decision Structure</h3>
+
+<pre class="code-block"><code class="language-json">{
+  "arbitration": {
+    "conflicts_detected": 6,
+    "conflict_summaries": [
+      {
+        "dimension": "cost_vs_compliance",
+        "agents_involved": ["Cost", "Compliance"],
+        "issue": "Cost recommends GRS storage; Compliance flags data residency violation",
+        "resolution": "OVERRULE Cost",
+        "rationale": "GRS replicates data outside India, violating DPDP Section 16",
+        "overruled_agent": "Cost",
+        "resolved_in_favor_of": "Compliance"
+      }
+    ],
+    "final_verdict": {
+      "approved_architecture": "Use LRS storage within India region...",
+      "plain_language_summary": "We chose compliance over cost because..."
+    }
+  }
+}</code></pre>
+
+<p><strong>Why both <code class='inline-code'>approved_architecture</code> and <code class='inline-code'>plain_language_summary</code>?</strong> Two distinct audiences:</p>
+<ul>
+<li><strong>Approved architecture</strong>: Technical decision suitable for engineers to implement</li>
+<li><strong>Plain language summary</strong>: For non-technical stakeholders (project sponsors, compliance officers)</li>
+</ul>
+
+
+<p>The dashboard currently uses the <code class='inline-code'>approved_architecture</code> field. The <code class='inline-code'>plain_language_summary</code> is stored for future use in executive summaries.</p>
+
+<hr class="section-divider">
+
+<h2 id='8-session-orchestrator'>8. Session Orchestrator</h2>
+
+<h3 id='8-1-orchestrator-architecture-src-core-orchestrator-py'>8.1 Orchestrator Architecture (src/core/orchestrator.py)</h3>
+
+<pre class="code-block"><code class="language-python">class Orchestrator:
+    def __init__(self):
+        self.sessions: dict[str, Session] = {}
+        self.turns: dict[str, list[AgentTurn]] = {}
+        self.conflicts: dict[str, list[Conflict]] = {}
+        self.arbitrations: dict[str, ArbitrationDecision] = {}
+        self.artifacts: dict[str, list[Artifact]] = {}</code></pre>
+
+<p><strong>Why in-memory storage instead of a database?</strong> For the current scale (demo sessions, student project), in-memory storage is:</p>
+<ul>
+<li><strong>Zero setup</strong>: No database provisioning, no connection management</li>
+<li><strong>Fast</strong>: Dict lookups are O(1) — no network calls</li>
+<li><strong>Simple to debug</strong>: Session state visible in memory</li>
+<li><strong>Adequate scale</strong>: Even 100 concurrent sessions (unlikely) would use < 50MB RAM</li>
+</ul>
+
+
+<p>For production, this would be replaced with <strong>Azure Cosmos DB</strong> (for global distribution) or <strong>Azure Redis Cache</strong> (for low-latency session state). The migration would require:</p>
+<ol>
+<li>Making <code class='inline-code'>Session</code> Pydantic models serializable (already done)</li>
+<li>Implementing <code class='inline-code'>load_session()</code> and <code class='inline-code'>save_session()</code> methods</li>
+<li>Adding a database URL to settings</li>
+</ol>
+
+
+<h3 id='8-2-callback-hooks-for-real-time-streaming'>8.2 Callback Hooks for Real-Time Streaming</h3>
+
+<pre class="code-block"><code class="language-python">def set_callbacks(self, on_agent_done, on_judge_done, on_conflict_detected):
+    self._on_agent_done = on_agent_done
+    self._on_judge_done = on_judge_done
+    self._on_conflict_detected = on_conflict_detected</code></pre>
+
+<p><strong>Why callback hooks instead of WebSockets or polling?</strong> Streamlit doesn't natively support WebSockets to the server backend. Options considered:</p>
+
+<table><thead><tr><th>Approach</th><th>Complexity</th><th>Real-time</th><th>Streamlit Compatible</th></tr></thead><tbody>
+<tr><td><strong>Callbacks</strong></td><td>Low</td><td>✅ (nested)</td><td>✅ Native</td></tr>
+<tr><td><strong>Polling</strong></td><td>Medium</td><td>❌ (1-2s delay)</td><td>✅ Native</td></tr>
+<tr><td><strong>WebSockets</strong></td><td>High</td><td>✅ True real-time</td><td>❌ Requires st.experimental</td></tr>
+<tr><td><strong>Server-Sent Events</strong></td><td>High</td><td>✅ True real-time</td><td>❌ Requires extension</td></tr>
+</tbody></table>
+
+
+<p>Callbacks win because:</p>
+<ol>
+<li><strong>Zero infrastructure</strong>: Just function pointers</li>
+<li><strong>Streamlit compatibility</strong>: Called from synchronous Streamlit event loop</li>
+<li><strong>Fire-and-forget</strong>: The Orchestrator doesn't wait for the callback to complete</li>
+<li><strong>Clean cleanup</strong>: <code class='inline-code'>clear_callbacks()</code> prevents callback leakage across re-renders</li>
+</ol>
+
+
+<h3 id='8-3-artifact-generation'>8.3 Artifact Generation</h3>
+
+<pre class="code-block"><code class="language-python">def generate_artifacts(self, session_id: str) -&gt; list[Artifact]:
+    # Generates: Bicep, Terraform, Cost Forecast, Compliance Report, Arbitration Rationale</code></pre>
+
+<p><strong>Why 5 specific artifacts?</strong> Each artifact serves a distinct purpose in a real cloud migration:</p>
+
+<table><thead><tr><th>Artifact</th><th>Purpose</th><th>Consumer</th></tr></thead><tbody>
+<tr><td><strong>Bicep Template</strong></td><td>Azure-native IaC</td><td>DevOps Engineer</td></tr>
+<tr><td><strong>Terraform Config</strong></td><td>Multi-cloud IaC</td><td>Platform Engineer</td></tr>
+<tr><td><strong>Cost Forecast</strong></td><td>Budget approval</td><td>FinOps / Finance</td></tr>
+<tr><td><strong>Compliance Report</strong></td><td>Regulatory evidence</td><td>Compliance Officer</td></tr>
+<tr><td><strong>Arbitration Rationale</strong></td><td>Decision traceability</td><td>Architect / Auditor</td></tr>
+</tbody></table>
+
+
+<p><strong>Why both Bicep and Terraform?</strong> The Azure ecosystem uses both:</p>
+<ul>
+<li><strong>Bicep</strong>: Azure-native, simpler syntax, cannot manage non-Azure resources</li>
+<li><strong>Terraform</strong>: Multi-cloud, larger community, can manage Azure + AWS + GCP</li>
+</ul>
+
+
+<p>Generating both maximizes utility for different teams.</p>
+
+<h3 id='8-4-the-build_result_dict-method'>8.4 The build_result_dict Method</h3>
+
+<pre class="code-block"><code class="language-python">def build_result_dict(self, session_id: str) -&gt; dict:
+    """Build a complete result dict suitable for dashboard display."""</code></pre>
+
+<p>This method is the transformation layer between the internal data model and the dashboard rendering. It:</p>
+<ol>
+<li>Joins data from 5 separate dicts (sessions, turns, conflicts, arbitrations, artifacts)</li>
+<li>Strips code fences from JSON outputs (for clean rendering)</li>
+<li>Calculates aggregate metrics (total time, conflict count)</li>
+<li>Formats arbitration decisions for human consumption</li>
+</ol>
+
+
+<p><strong>Why not return Pydantic models directly?</strong> The <code class='inline-code'>build_result_dict</code> transforms the data for display. Pydantic models contain:</p>
+<ul>
+<li>Internal IDs (<code class='inline-code'>turn_id</code>, <code class='inline-code'>session_id</code>) — not user-relevant</li>
+<li>Raw output text — needs cleaning</li>
+<li>Nested objects — need flattening for dashboard</li>
+</ul>
+
+
+<p>The dict format is simpler for the dashboard to consume, especially with Streamlit's <code class='inline-code'>st.json</code> and <code class='inline-code'>st.code</code> which work with native Python types.</p>
+
+<hr class="section-divider">
+
+<h2 id='9-azure-pricing-engine'>9. Azure Pricing Engine</h2>
+
+<h3 id='9-1-architecture'>9.1 Architecture</h3>
+
+<pre class="code-block"><code class="language-">                ┌──────────────────────┐
+                │  Live API Client     │
+                │  (azure_prices_api)  │
+                │  Source: Microsoft   │
+                │  No auth required    │
+                └──────────┬───────────┘
+                           │ cache miss
+                   ┌───────▼───────────┐
+                   │  LLM Cache        │
+                   │  (get_raw/        │
+                   │   set_raw)        │
+                   └───────┬───────────┘
+                           │ fallback
+                   ┌───────▼───────────┐
+                   │  Static Database  │
+                   │  (azure_pricing)  │
+                   │  4 regions,       │
+                   │  100+ VM SKUs     │
+                   └───────────────────┘</code></pre>
+
+<h3 id='9-2-live-api-client-src-core-azure_prices_api-py'>9.2 Live API Client (src/core/azure_prices_api.py)</h3>
+
+<pre class="code-block"><code class="language-python">AZURE_RETAIL_API = "https://prices.azure.com/api/retail/prices"
+# Public API — no authentication required!</code></pre>
+
+<p><strong>No authentication required?</strong> Yes — the Azure Retail Prices API is a public API that requires no API key, no Azure subscription, and no authentication. This is by design — Microsoft wants pricing data to be transparent and accessible.</p>
+
+<p><strong>Why use the live API at all?</strong> Static pricing becomes outdated:</p>
+<ul>
+<li>Azure changes prices ~monthly (new regions, new SKUs, price adjustments)</li>
+<li>Reserved Instance prices vary by region and term</li>
+<li>Spot prices fluctuate in real-time</li>
+</ul>
+
+
+<p>The live API ensures:</p>
+<ul>
+<li><strong>Always current prices</strong>: No manual updates needed</li>
+<li><strong>Transparency</strong>: Users can verify prices against Azure's official source</li>
+<li><strong>Comprehensive coverage</strong>: All 60+ Azure regions, 1000+ SKUs</li>
+</ul>
+
+
+<h3 id='9-3-caching-strategy'>9.3 Caching Strategy</h3>
+
+<pre class="code-block"><code class="language-python"># Cache key format: "azure_prices:{service}|{region}|{sku}|{type}|{meter}"
+cache_key = f"azure_prices:{cache_key_parts}"
+cached = cache.get_raw(cache_key)</code></pre>
+
+<p><strong>Why use the LLM cache for pricing?</strong> The <code class='inline-code'>get_raw/set_raw</code> API was specifically added to <code class='inline-code'>LLMCache</code> for this purpose. Pricing data is cached for 1 hour (default TTL) because:</p>
+<ul>
+<li>Azure prices don't change more frequently than hourly</li>
+<li>1 hour TTL provides responsiveness without staleness</li>
+<li>Cache survives restarts (disk-persisted)</li>
+</ul>
+
+
+<p><strong>Why not use <code class='inline-code'>st.cache_data</code> (Streamlit's cache)?</strong> Streamlit's cache resets when the app re-runs. Pricing data should persist across app restarts to avoid a cold-start API call on every deployment.</p>
+
+<h3 id='9-4-pagination-handling'>9.4 Pagination Handling</h3>
+
+<pre class="code-block"><code class="language-python">while url and len(all_items) &lt; max_results:
+    resp = httpx.get(url, timeout=REQUEST_TIMEOUT)
+    data = resp.json()
+    items = data.get("Items", [])
+    # ... add items ...
+    url = data.get("NextPageLink", "")  # Follow pagination</code></pre>
+
+<p>The Azure Retail Prices API uses continuation tokens (<code class='inline-code'>NextPageLink</code>) instead of traditional pagination (<code class='inline-code'>$top</code> / <code class='inline-code'>$skip</code>). This is important because:</p>
+<ul>
+<li><code class='inline-code'>$top</code> is <strong>not supported</strong> by this API (returns full page regardless)</li>
+<li><code class='inline-code'>NextPageLink</code> appears when results exceed ~1000 items</li>
+<li>We iterate until <code class='inline-code'>max_results</code> is reached or no more pages exist</li>
+</ul>
+
+
+<h3 id='9-5-static-pricing-fallback-src-core-azure_pricing-py'>9.5 Static Pricing Fallback (src/core/azure_pricing.py)</h3>
+
+<p>The static database contains <strong>100+ VM SKUs across 4 regions</strong> with:</p>
+<ul>
+<li>VM pricing (hourly, by SKU)</li>
+<li>Storage pricing (per GB/month, by tier)</li>
+<li>SQL Database pricing (per vCore/hour, by tier)</li>
+<li>Spot and Reserved Instance pricing where available</li>
+</ul>
+
+
+<p><strong>Why 4 regions specifically?</strong> The project started with the most common deployment regions:</p>
+<ul>
+<li><strong>Central India</strong>: Lowest cost, popular for India compliance</li>
+<li><strong>North Europe</strong>: Moderate cost, popular for GDPR workloads</li>
+<li><strong>East US</strong>: Standard pricing, popular for US workloads</li>
+<li><strong>UAE North</strong>: Higher cost, required for UAE PDPL compliance</li>
+</ul>
+
+
+<p>These correspond to the 4 compliance frameworks we support.</p>
+
+<h3 id='9-6-region-resolution'>9.6 Region Resolution</h3>
+
+<pre class="code-block"><code class="language-python">def resolve_region(alias: str) -&gt; str:
+    """20+ user-friendly aliases → canonical region names."""
+    # "dubai", "abudhabi", "uae north" → "uaenorth"
+    # "in", "central india" → "centralindia"
+    # "eu", "europe" → "northeurope"
+    # "us", "usa", "united states" → "eastus"</code></pre>
+
+<p><strong>Why 20+ aliases?</strong> Users enter region names in unpredictable ways:</p>
+<ul>
+<li>"UAE" vs "UAENorth" vs "uae north" vs "Dubai" vs "Abu Dhabi" vs "United Arab Emirates"</li>
+<li>All should resolve to <code class='inline-code'>uaenorth</code></li>
+</ul>
+
+
+<p>The alias table normalizes all common variations case-insensitively.</p>
+
+<hr class="section-divider">
+
+<h2 id='10-compliance-knowledge-base-rag'>10. Compliance Knowledge Base & RAG</h2>
+
+<h3 id='10-1-structured-rule-database-src-core-compliance_rules-py'>10.1 Structured Rule Database (src/core/compliance_rules.py)</h3>
+
+<pre class="code-block"><code class="language-python">class ComplianceRule(BaseModel):
+    id: str
+    region: str
+    governing_framework: str      # e.g., "India DPDP Act 2023"
+    constraint_type: str          # residency, consent, audit, encryption, breach_notification
+    constraint_text: str          # "Personal data must be stored within India"
+    source_citation: str          # "DPDP Act 2023, Section 16"
+    applies_to_services: list[str]
+    active: bool = True</code></pre>
+
+<p><strong>Why structured rules instead of free-text regulations?</strong> Structured rules enable:</p>
+<ol>
+<li><strong>Programmatic matching</strong>: Filter by region + constraint_type</li>
+<li><strong>RAG vector search</strong>: Convert to embeddings for semantic matching</li>
+<li><strong>CI/CD verification</strong>: Test that all required rules exist for each framework</li>
+<li><strong>Traceable citations</strong>: Each rule links to a specific regulation section</li>
+</ol>
+
+
+<h3 id='10-2-framework-coverage'>10.2 Framework Coverage</h3>
+
+<table><thead><tr><th>Framework</th><th>Rules</th><th>Regions</th><th>Key Citations</th></tr></thead><tbody>
+<tr><td>India DPDP Act 2023</td><td>5</td><td>India</td><td>Section 16 (residency), Section 7 (consent)</td></tr>
+<tr><td>EU GDPR</td><td>5</td><td>EU</td><td>Article 32 (security), Article 33 (breach)</td></tr>
+<tr><td>US HIPAA</td><td>6</td><td>US</td><td>45 CFR 164.312 (controls), 45 CFR 164.308 (process)</td></tr>
+<tr><td>UAE PDPL</td><td>5</td><td>UAE</td><td>Articles 14-16 (transfer), Article 6 (consent)</td></tr>
+</tbody></table>
+
+
+<p><strong>Why exactly these 4?</strong> The initial scope was determined by:</p>
+<ol>
+<li><strong>Microsoft's global regions</strong>: These 4 regions cover the most common compliance scenarios</li>
+<li><strong>Student project scope</strong>: Adding more frameworks would require legal expertise we don't have</li>
+<li><strong>Representative diversity</strong>: Each framework represents a different regulatory philosophy (residency-focused, rights-focused, industry-specific, emerging)</li>
+</ol>
+
+
+<h3 id='10-3-rag-integration'>10.3 RAG Integration</h3>
+
+<pre class="code-block"><code class="language-python">if agent_type == AgentType.COMPLIANCE and session.region:
+    rules = get_rules_for_region(session.region)
+    if rules:
+        rules_text = "\nRETRIEVED COMPLIANCE RULES (RAG):\n"
+        for r in rules:
+            rules_text += f"- [{r.governing_framework}] {r.constraint_type}: {r.constraint_text}\n"
+            rules_text += f"  Source: {r.source_citation}\n"
+        extra_context = [{"role": "system", "content": rules_text}]</code></pre>
+
+<p><strong>Why inject rules into the prompt instead of having the LLM retrieve them?</strong> The LLM's training data contains general knowledge about GDPR and HIPAA, but may be:</p>
+<ul>
+<li><strong>Outdated</strong>: DPDP 2023 was enacted after many models' training cutoffs</li>
+<li><strong>Inaccurate</strong>: LLMs often confuse similar regulations (e.g., GDPR Article numbers)</li>
+<li><strong>Incomplete</strong>: Specific sections and citations are notoriously hallucinated</li>
+</ul>
+
+
+<p>By injecting curated rules into the prompt, we:</p>
+<ul>
+<li><strong>Guarantee accuracy</strong>: The rules are verified against actual legislation</li>
+<li><strong>Provide citations</strong>: Every claim has a specific source reference</li>
+<li><strong>Cover emerging regulations</strong>: DPDP 2023 and UAE PDPL may not be in training data</li>
+</ul>
+
+
+<h3 id='10-4-why-rag-instead-of-fine-tuning'>10.4 Why RAG Instead of Fine-Tuning?</h3>
+
+<table><thead><tr><th>Factor</th><th>RAG (Chosen)</th><th>Fine-Tuning</th></tr></thead><tbody>
+<tr><td><strong>Development time</strong></td><td>2 days</td><td>2+ weeks (data prep + training)</td></tr>
+<tr><td><strong>Update frequency</strong></td><td>Instant (change rules file)</td><td>Retraining required</td></tr>
+<tr><td><strong>Cost</strong></td><td>$0 (file-based)</td><td>$50-500+ per training run</td></tr>
+<tr><td><strong>Accuracy</strong></td><td>Guaranteed (exact rules)</td><td>Probabilistic (model weights)</td></tr>
+<tr><td><strong>Transparency</strong></td><td>Rules visible in code</td><td>Rules hidden in weights</td></tr>
+<tr><td><strong>Scalability</strong></td><td>Add rules to a Python dict</td><td>Need new training dataset</td></tr>
+</tbody></table>
+
+
+<p>RAG wins decisively for this use case because compliance is a domain where <strong>accuracy matters more than fluency</strong>. An LLM must never invent a regulation — with RAG, it can't, because every claim must be in the provided context.</p>
+
+<hr class="section-divider">
+
+<h2 id='11-llm-response-cache'>11. LLM Response Cache</h2>
+
+<h3 id='11-1-architecture-src-core-llm_cache-py'>11.1 Architecture (src/core/llm_cache.py)</h3>
+
+<pre class="code-block"><code class="language-python">class LLMCache:
+    def __init__(self, ttl_seconds=3600, max_size=1000, persist_path=None):
+        self._data: dict[str, CacheEntry] = {}
+        self._stats = {"hits": 0, "misses": 0, "evictions": 0}
+        self._load_from_disk()  # Survive restarts</code></pre>
+
+<h3 id='11-2-cache-key-design'>11.2 Cache Key Design</h3>
+
+<pre class="code-block"><code class="language-python">def _make_cache_key(messages: list[dict], model: str, temperature: float) -&gt; str:
+    msg_hash = _hash_messages(messages)
+    return f"llm:{model}:{temperature:.1f}:{msg_hash}"
+
+def _hash_messages(messages: list[dict]) -&gt; str:
+    serialized = json.dumps(messages, sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()</code></pre>
+
+<p><strong>Why SHA256 instead of MD5 or built-in hash()?</strong></p>
+<ul>
+<li><strong>SHA256</strong>: Cryptographically sufficient for uniqueness, fast enough (< 1µs per hash)</li>
+<li><strong>MD5</strong>: 128 bits → higher collision probability (1 in 2^64 vs 1 in 2^256)</li>
+<li><strong>built-in hash()</strong>: Not deterministic across Python process restarts</li>
+</ul>
+
+
+<p><strong>Why include model and temperature in the key?</strong> The same prompt produces different outputs with:</p>
+<ul>
+<li>Different models (Mistral vs GPT-4o)</li>
+<li>Different temperatures (0.2 vs 0.8)</li>
+</ul>
+
+
+<p>If we keyed only on messages, switching models would return stale cached responses.</p>
+
+<h3 id='11-3-raw-key-value-api'>11.3 Raw Key-Value API</h3>
+
+<pre class="code-block"><code class="language-python">def get_raw(self, key: str) -&gt; Optional[str]: ...
+def set_raw(self, key: str, value: str): ...
+def invalidate_raw(self, key: str): ...</code></pre>
+
+<p><strong>Why a separate raw API?</strong> The LLM cache was designed for message-based caching. Adding a raw API enabled pricing data caching without:</p>
+<ul>
+<li>Creating a second cache instance</li>
+<li>Fitting pricing queries into the message format</li>
+<li>Confusing LLM and pricing entries</li>
+</ul>
+
+
+<p>The raw API prefix is <code class='inline-code'>raw:</code>, creating key isolation:</p>
+<ul>
+<li><code class='inline-code'>llm:mistral:0.2:sha256hash...</code> — LLM responses</li>
+<li><code class='inline-code'>raw:azure_prices:Virtual Machines|centralindia|...</code> — Pricing data</li>
+</ul>
+
+
+<h3 id='11-4-ttl-and-eviction'>11.4 TTL and Eviction</h3>
+
+<pre class="code-block"><code class="language-python">def _evict_oldest(self):
+    """Evict ~20% of oldest entries when cache is full."""
+    evict_count = max(1, self.max_size // 5)
+    keys_to_evict = list(self._data.keys())[:evict_count]
+    for key in keys_to_evict:
+        del self._data[key]</code></pre>
+
+<p><strong>Why FIFO eviction instead of LRU?</strong> Python's <code class='inline-code'>dict</code> preserves insertion order (Python 3.7+). For this use case, FIFO is:</p>
+<ul>
+<li><strong>Simple</strong>: No need for access time tracking</li>
+<li><strong>Fast</strong>: O(k) where k = eviction count</li>
+<li><strong>Adequate</strong>: Old entries (likely stale) are removed first</li>
+</ul>
+
+
+<p>True LRU would require an ordered dictionary with access timestamp updates — ~50 lines of additional code for marginal benefit.</p>
+
+<p><strong>Why evict 20% instead of 1 entry?</strong> Batch eviction reduces the frequency of eviction operations. If the cache fills up frequently (e.g., during a demo), evicting 1 entry at a time means O(n) evictions to regain capacity. Evicting 20% at once means the next eviction won't happen until the cache fills again (20% more entries).</p>
+
+<h3 id='11-5-disk-persistence'>11.5 Disk Persistence</h3>
+
+<pre class="code-block"><code class="language-python">def _save_to_disk(self):
+    """Write cache entries to disk as JSON (best-effort)."""
+    try:
+        payload = {"version": 1, "entries": serializable, ...}
+        path = self._persist_path()
+        with open(path, "w") as f:
+            json.dump(payload, f, indent=2)
+    except Exception as e:
+        logger.warning(f"Failed to persist LLM cache: {e}")</code></pre>
+
+<p><strong>Why persist every write?</strong> This is a design trade-off:</p>
+<ul>
+<li><strong>Pro</strong>: Cache survives app restarts, server crashes, and redeployments</li>
+<li><strong>Con</strong>: Every set/invalidate operation does file I/O (~5-10ms)</li>
+</ul>
+
+
+<p>The trade-off favors persistence because:</p>
+<ol>
+<li>Cache entries are expensive to generate (LLM API calls cost money)</li>
+<li>Demo mode mock responses are deterministic — cache hits eliminate redundant computation</li>
+<li>The cache file is small (< 1MB for 1000 entries)</li>
+</ol>
+
+
+<p><strong>What about corruption?</strong> The <code class='inline-code'>_load_from_disk</code> method handles:</p>
+<ul>
+<li><strong>Missing file</strong>: Start fresh</li>
+<li><strong>Invalid JSON</strong>: Log warning, start fresh</li>
+<li><strong>Expired entries</strong>: Skip, don't load</li>
+<li><strong>Any exception</strong>: Log warning, start fresh</li>
+</ul>
+
+
+<p>This is "crash-only" design — the cache never leaves the system in an inconsistent state.</p>
+
+<hr class="section-divider">
+
+<h2 id='12-observability-system'>12. Observability System</h2>
+
+<h3 id='12-1-three-pillars-of-observability'>12.1 Three Pillars of Observability</h3>
+
+<table><thead><tr><th>Pillar</th><th>Class</th><th>Purpose</th><th>Storage</th></tr></thead><tbody>
+<tr><td><strong>Tracing</strong></td><td><code class='inline-code'>WorkflowTracer</code></td><td>Record every event with timing</td><td><code class='inline-code'>.freebuff/traces/</code></td></tr>
+<tr><td><strong>Audit Logging</strong></td><td><code class='inline-code'>AuditLogger</code></td><td>Append-only decision records</td><td><code class='inline-code'>.freebuff/audit/</code></td></tr>
+<tr><td><strong>Metrics</strong></td><td><code class='inline-code'>MetricsCollector</code></td><td>Aggregate performance data</td><td>In-memory</td></tr>
+</tbody></table>
+
+
+<h3 id='12-2-workflowtracer-src-core-observability-py'>12.2 WorkflowTracer (src/core/observability.py)</h3>
+
+<pre class="code-block"><code class="language-python">class TraceEvent(BaseModel):
+    trace_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    event_type: TraceEventType  # SESSION_START, AGENT_START, CONFLICT_DETECTED, etc.
+    session_id: str
+    agent_type: Optional[str] = None
+    duration_ms: Optional[float] = None
+    error: Optional[str] = None
+    metadata: dict = Field(default_factory=dict)</code></pre>
+
+<p><strong>11 trace event types</strong> cover the entire session lifecycle:</p>
+
+<table><thead><tr><th>Event</th><th>Fire Time</th><th>Key Fields</th></tr></thead><tbody>
+<tr><td>SESSION_START</td><td>Session created</td><td>user_id</td></tr>
+<tr><td>SESSION_END</td><td>Session completed</td><td>duration_seconds</td></tr>
+<tr><td>AGENT_START</td><td>Agent begins execution</td><td>agent_type, input_summary</td></tr>
+<tr><td>AGENT_END</td><td>Agent completes</td><td>output_summary, error</td></tr>
+<tr><td>LLM_CALL_START</td><td>LLM API call</td><td>model, token_estimate</td></tr>
+<tr><td>LLM_CALL_END</td><td>LLM API response</td><td>response_time, token_count</td></tr>
+<tr><td>CONFLICT_DETECTED</td><td>Conflict found</td><td>dimension, conflict_count</td></tr>
+<tr><td>ARBITRATION_START</td><td>Judge begins</td><td>conflict_count</td></tr>
+<tr><td>ARBITRATION_END</td><td>Judge completes</td><td>output_summary</td></tr>
+<tr><td>ARTIFACT_GENERATED</td><td>Artifact created</td><td>artifact_type, format</td></tr>
+<tr><td>ERROR</td><td>Any error</td><td>error</td></tr>
+</tbody></table>
+
+
+<h3 id='12-3-span-based-timing'>12.3 Span-Based Timing</h3>
+
+<pre class="code-block"><code class="language-python">trace_id = self.tracer.start_span(TraceEventType.AGENT_START, session_id, ...)
+# ... agent runs ...
+self.tracer.end_span(trace_id, output_summary=..., error=None)</code></pre>
+
+<p><strong>Why start/end spans instead of two separate events?</strong> The span pattern:</p>
+<ol>
+<li>Creates one event with <code class='inline-code'>duration_ms</code> calculated automatically</li>
+<li>Ensures the start and end are logically paired</li>
+<li>Allows nested spans (parent_trace_id)</li>
+<li>Simplified cleanup — no orphaned start events</li>
+</ol>
+
+
+<h3 id='12-4-audit-logger'>12.4 Audit Logger</h3>
+
+<pre class="code-block"><code class="language-python">class AuditLogger:
+    def log_decision(self, session_id, decision_type, agent, rationale, evidence=None):
+        """Append-only audit entry. Never modifies existing entries."""
+        entry = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "log_id": uuid.uuid4().hex,
+            "session_id": session_id,
+            "decision_type": decision_type,
+            "agent": agent,
+            "rationale": rationale,
+            "evidence": evidence or {},
+        }
+        self._entries[session_id].append(entry)
+        self._flush_to_disk()  # Append to .audit.jsonl</code></pre>
+
+<p><strong>Why append-only?</strong> Audit logs must be immutable to be credible:</p>
+<ol>
+<li><strong>No deletion</strong>: Entries cannot be removed once written</li>
+<li><strong>No modification</strong>: Old entries cannot be edited</li>
+<li><strong>Timestamped</strong>: Every entry has a creation timestamp</li>
+<li><strong>Sequential</strong>: Entries are in chronological order</li>
+</ol>
+
+
+<p>The file format is <code class='inline-code'>.audit.jsonl</code> (JSON Lines) — one JSON object per line. This is append-only, human-readable, and machine-parseable.</p>
+
+<h3 id='12-5-opentelemetry-export'>12.5 OpenTelemetry Export</h3>
+
+<pre class="code-block"><code class="language-python">def export_opentelemetry(self, session_id: str) -&gt; dict:
+    """Export trace as OpenTelemetry-compatible JSON."""
+    return {
+        "resourceSpans": [{
+            "scopeSpans": [{
+                "spans": [{
+                    "name": event.event_type.value,
+                    "traceId": event.trace_id,
+                    "attributes": {
+                        "session.id": event.session_id,
+                        "event.type": event.event_type.value,
+                        ...
+                    }
+                }]
+            }]
+        }]
+    }</code></pre>
+
+<p><strong>Why OpenTelemetry format?</strong> OpenTelemetry is the industry standard for observability data. By exporting in OTel format:</p>
+<ul>
+<li>Future integration with Azure Monitor, Datadog, or Grafana becomes straightforward</li>
+<li>The data model is standard and tooling-agnostic</li>
+<li>No lock-in to a specific monitoring vendor</li>
+</ul>
+
+
+<hr class="section-divider">
+
+<h2 id='13-health-check-system'>13. Health Check System</h2>
+
+<h3 id='13-1-registry-pattern-src-core-health-py'>13.1 Registry Pattern (src/core/health.py)</h3>
+
+<pre class="code-block"><code class="language-python">class HealthRegistry:
+    def register(self, name: str, check_fn: Callable) -&gt; None:
+        """Register a health check function."""
+        self._checks[name] = check_fn
+
+    def check_all(self) -&gt; HealthReport:
+        """Run all registered health checks."""
+        checks = []
+        for name, fn in self._checks.items():
+            start = time.monotonic()
+            try:
+                result = fn()
+                result.latency_ms = (time.monotonic() - start) * 1000
+                checks.append(result)
+            except Exception as e:
+                checks.append(HealthStatus(name, "error", str(e)))
+        return self._aggregate(checks)</code></pre>
+
+<p><strong>Why the registry pattern instead of a fixed health endpoint?</strong> Because health checks are extensible:</p>
+<ul>
+<li><strong>Orchestrator module loaded</strong>: <code class='inline-code'>check_all</code> verifies imports resolve</li>
+<li><strong>LLM cache healthy</strong>: <code class='inline-code'>check_all</code> verifies cache not near capacity</li>
+<li><strong>Future checks</strong>: Database connection, API availability, disk space</li>
+</ul>
+
+
+<p>Adding a health check is one function + one registry call — no new endpoint logic needed.</p>
+
+<h3 id='13-2-singleton-pattern'>13.2 Singleton Pattern</h3>
+
+<pre class="code-block"><code class="language-python">class HealthRegistry:
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls) -&gt; HealthRegistry:
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance</code></pre>
+
+<p><strong>Why singleton?</strong> Multiple components register health checks (<code class='inline-code'>dashboard.py</code> registers <code class='inline-code'>orchestrator</code> and <code class='inline-code'>cache</code>), and the sidebar displays them. A single registry ensures:</p>
+<ol>
+<li>All checks are in one place</li>
+<li>The sidebar reads from the same instance that components register with</li>
+<li>No coordination needed between registration and display</li>
+</ol>
+
+
+<hr class="section-divider">
+
+<h2 id='14-input-sanitization-security'>14. Input Sanitization & Security</h2>
+
+<h3 id='14-1-sanitization-pipeline-src-core-sanitize-py'>14.1 Sanitization Pipeline (src/core/sanitize.py)</h3>
+
+<pre class="code-block"><code class="language-python">def sanitize_text(text, max_length=5000):
+    """Strip whitespace, null bytes, enforce max length."""
+    if text is None: return ""
+    if not isinstance(text, str): return str(text)
+    text = text.strip()
+    text = text.replace("\x00", "")  # Remove null bytes
+    return text[:max_length]
+
+def detect_suspicious_input(text):
+    """Detect XSS and injection attempts."""
+    patterns = ["&lt;script", "javascript:", "onerror=", "onload=", ...]
+    return any(p in text.lower() for p in patterns)</code></pre>
+
+<p><strong>Why sanitize at all in a Streamlit app?</strong> Even though Streamlit is server-rendered (no direct DOM access), sanitized inputs prevent:</p>
+<ol>
+<li><strong>LLM prompt injection</strong>: Malicious text in user input could alter agent behavior</li>
+<li><strong>XSS in st.markdown</strong>: We use <code class='inline-code'>unsafe_allow_html=True</code> (necessary for styled output) — sanitized inputs prevent XSS</li>
+<li><strong>Log injection</strong>: Attackers could inject fake log entries via user input</li>
+<li><strong>Database injection</strong>: If inputs reach any database, they're already sanitized</li>
+</ol>
+
+
+<h3 id='14-2-suspicious-input-detection'>14.2 Suspicious Input Detection</h3>
+
+<pre class="code-block"><code class="language-python">SUSPICIOUS_PATTERNS = [
+    r"&lt;script[^&gt;]*&gt;",          # HTML script tags
+    r"javascript:",             # javascript: protocol
+    r"onerror=",                # Event handlers
+    r"onload=",
+    r"alert\s*\(",             # JS alert() calls
+    r"document\.cookie",        # Cookie access
+    r"fetch\s*\(",              # JS fetch API
+    r"eval\s*\(",               # JS eval()
+]</code></pre>
+
+<p>These patterns catch the most common web attacks while having near-zero false positive rate on legitimate infrastructure descriptions.</p>
+
+<hr class="section-divider">
+
+<h2 id='15-error-tracking-with-sentry'>15. Error Tracking with Sentry</h2>
+
+<h3 id='15-1-integration-src-core-sentry-py'>15.1 Integration (src/core/sentry.py)</h3>
+
+<pre class="code-block"><code class="language-python">def init_sentry(dsn=None, environment=None):
+    if _initialized: return  # Idempotent
+    if not dsn and not settings.sentry_dsn: return  # Safe no-op
+    
+    sentry_sdk.init(
+        dsn=dsn or settings.sentry_dsn,
+        release=f"cloudoptima@{settings.app_version}",
+        environment=environment or ("demo" if settings.demo_mode else "production"),
+        before_send=_before_send,  # Data sanitization callback
+    )
+    _initialized = True</code></pre>
+
+<p><strong>Why Sentry over alternatives?</strong> For a student project with $0 budget:</p>
+
+<table><thead><tr><th>Feature</th><th>Sentry (Chosen)</th><th>Rollbar</th><th>Datadog</th><th>LogRocket</th></tr></thead><tbody>
+<tr><td><strong>Free tier</strong></td><td>✅ 5K errors/month</td><td>✅ 5K events/month</td><td>❌ Starts at $15/month</td><td>✅ 1K sessions/month</td></tr>
+<tr><td><strong>GitHub integration</strong></td><td>✅ Native</td><td>✅ Native</td><td>❌</td><td>❌</td></tr>
+<tr><td><strong>Breadcrumbs</strong></td><td>✅ Built-in</td><td>❌</td><td>❌</td><td>✅</td></tr>
+<tr><td><strong>Python SDK</strong></td><td>✅ Mature</td><td>✅ Mature</td><td>✅ (beta)</td><td>❌ No Python SDK</td></tr>
+<tr><td><strong>Self-hosted option</strong></td><td>✅ Free (onpremise)</td><td>❌</td><td>❌</td><td>❌</td></tr>
+</tbody></table>
+
+
+<p>Sentry wins because it's the only option with both a mature Python SDK and a generous free tier.</p>
+
+<h3 id='15-2-before-send-callback'>15.2 Before-Send Callback</h3>
+
+<pre class="code-block"><code class="language-python">def _before_send(event, hint):
+    """Sanitize sensitive data before sending to Sentry."""
+    # Remove local variables from stack frames
+    for value in event.get("exception", {}).get("values", []):
+        for frame in value.get("stacktrace", {}).get("frames", []):
+            frame.pop("vars", None)
+    
+    # Redact sensitive request data
+    request = event.get("request", {})
+    request.pop("data", None)        # Remove request body
+    request.pop("cookies", None)     # Remove cookies
+    request.pop("headers", {}).pop("Authorization", None)
+    return event</code></pre>
+
+<p><strong>Why sanitize before sending?</strong> In a medical/AI application, errors could contain:</p>
+<ul>
+<li><strong>NVIDIA API keys</strong>: If an LLM call fails, the API key might be in the stack trace</li>
+<li><strong>User data</strong>: The infrastructure description might contain sensitive information</li>
+<li><strong>Session IDs</strong>: Could identify users</li>
+</ul>
+
+
+<p>The <code class='inline-code'>_before_send</code> callback acts as a <strong>data loss prevention (DLP) layer</strong> — it removes anything that shouldn't leave the application.</p>
+
+<hr class="section-divider">
+
+<h2 id='16-configuration-management'>16. Configuration Management</h2>
+
+<h3 id='16-1-pydantic-settings-src-config-py'>16.1 Pydantic Settings (src/config.py)</h3>
+
+<pre class="code-block"><code class="language-python">class Settings(BaseSettings):
+    # NVIDIA NIMs
+    nvidia_api_key: str = ""
+    nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"
+    nvidia_model: str = "mistralai/mistral-small-4-119b-2603"
+    
+    # Per-agent model overrides
+    architect_model: Optional[str] = None
+    cost_model: Optional[str] = None
+    security_model: Optional[str] = None
+    compliance_model: Optional[str] = None
+    judge_model: Optional[str] = None
+    
+    demo_mode: bool = True
+    
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}</code></pre>
+
+<p><strong>Why Pydantic Settings instead of os.environ or python-decouple?</strong></p>
+
+<table><thead><tr><th>Feature</th><th>Pydantic Settings</th><th>os.environ</th><th>python-decouple</th></tr></thead><tbody>
+<tr><td><strong>Type validation</strong></td><td>✅ Automatic</td><td>❌ Strings only</td><td>❌ Strings only</td></tr>
+<tr><td><strong>Default values</strong></td><td>✅ Inline</td><td>❌ Manual</td><td>✅ Inline</td></tr>
+<tr><td><strong>Env file support</strong></td><td>✅ Built-in</td><td>❌ Manual</td><td>✅ Built-in</td></tr>
+<tr><td><strong>Nested configs</strong></td><td>✅ Sub-models</td><td>❌ Flat</td><td>❌ Flat</td></tr>
+<tr><td><strong>IDE autocomplete</strong></td><td>✅ Class methods</td><td>❌ Dict access</td><td>❌ String keys</td></tr>
+</tbody></table>
+
+
+<h3 id='16-2-per-agent-model-override'>16.2 Per-Agent Model Override</h3>
+
+<pre class="code-block"><code class="language-python">def get_agent_model(self, agent_type: str) -&gt; str:
+    override_map = {
+        "architect": self.architect_model,
+        "cost": self.cost_model,
+        "security": self.security_model,
+        "compliance": self.compliance_model,
+        "judge": self.judge_model,
+    }
+    return override_map.get(agent_type) or self.nvidia_model</code></pre>
+
+<p><strong>Why per-agent overrides?</strong> Different agents have different quality/latency/cost requirements:</p>
+
+<table><thead><tr><th>Agent</th><th>Optimal Model Size</th><th>Reason</th></tr></thead><tbody>
+<tr><td>Architect</td><td>Medium (e.g., Mistral Small)</td><td>Broad domain knowledge needed</td></tr>
+<tr><td>Cost</td><td>Small (e.g., LLaMA 3 8B)</td><td>Simple arithmetic comparisons</td></tr>
+<tr><td>Security</td><td>Large (e.g., Mistral Large)</td><td>Detailed vulnerability analysis</td></tr>
+<tr><td>Compliance</td><td>Large (e.g., Claude 3 Opus)</td><td>Regulatory nuance matters</td></tr>
+<tr><td>Judge</td><td>Medium (e.g., GPT-4o-mini)</td><td>Structuring existing data</td></tr>
+</tbody></table>
+
+
+<p>Setting <code class='inline-code'>COMPLIANCE_MODEL=claude-3-opus-20240229</code> would route only the Compliance agent to Claude while keeping other agents on the default model.</p>
+
+<hr class="section-divider">
+
+<h2 id='17-dashboard-streamlit-ui'>17. Dashboard (Streamlit UI)</h2>
+
+<h3 id='17-1-why-streamlit'>17.1 Why Streamlit?</h3>
+
+<table><thead><tr><th>Factor</th><th>Streamlit (Chosen)</th><th>Flask/FastAPI + React</th><th>Gradio</th><th>Dash (Plotly)</th></tr></thead><tbody>
+<tr><td><strong>Development time</strong></td><td>Days</td><td>Weeks</td><td>Days</td><td>Weeks</td></tr>
+<tr><td><strong>Python-only</strong></td><td>✅ Yes</td><td>❌ Requires JS</td><td>✅ Yes</td><td>✅ Yes</td></tr>
+<tr><td><strong>Hot reload</strong></td><td>✅ Built-in</td><td>❌ Manual setup</td><td>✅ Built-in</td><td>✅ Built-in</td></tr>
+<tr><td><strong>Deployment</strong></td><td>✅ Streamlit Cloud</td><td>❌ Multiple services</td><td>✅ Hugging Face</td><td>❌ Enterprise</td></tr>
+<tr><td><strong>UI polish</strong></td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td><td>⭐⭐</td><td>⭐⭐⭐⭐</td></tr>
+<tr><td><strong>SSR (SEO)</strong></td><td>❌ No (SPA)</td><td>✅ Yes</td><td>❌ No</td><td>❌ No</td></tr>
+</tbody></table>
+
+
+<p>Streamlit wins for this project because:</p>
+<ol>
+<li><strong>Single developer productivity</strong>: No HTML/CSS/JS needed</li>
+<li><strong>Zero infrastructure</strong>: Streamlit Community Cloud is free</li>
+<li><strong>Callback compatibility</strong>: Our callback hook pattern works naturally with Streamlit's event loop</li>
+</ol>
+
+
+<h3 id='17-2-page-configuration'>17.2 Page Configuration</h3>
+
+<pre class="code-block"><code class="language-python">st.set_page_config(
+    page_title="CloudOptima",
+    page_icon="☁️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)</code></pre>
+
+<p><strong>Why <code class='inline-code'>layout="wide"</code>?</strong> The results display has 4 agent tabs, conflict cards, artifacts, and KPI metrics. A narrow layout would require excessive scrolling. Wide layout displays everything on one screen.</p>
+
+<h3 id='17-3-dark-theme'>17.3 Dark Theme</h3>
+
+<p>The dashboard uses a custom dark theme with:</p>
+<ul>
+<li>Background: <code class='inline-code'>#0d0d1a</code> (deep navy black)</li>
+<li>Primary accent: <code class='inline-code'>#6C5CE7</code> (purple)</li>
+<li>Error: <code class='inline-code'>#EF4444</code> (red)</li>
+<li>Warning: <code class='inline-code'>#F59E0B</code> (amber)</li>
+<li>Success: <code class='inline-code'>#10B981</code> (emerald)</li>
+</ul>
+
+
+<p><strong>Why dark theme for a cloud architecture tool?</strong> Architects, developers, and operations teams overwhelmingly prefer dark UIs (VS Code, Azure Portal, AWS Console, Terraform Cloud). Dark themes:</p>
+<ul>
+<li>Reduce eye strain during long sessions</li>
+<li>Make code/output stand out better</li>
+<li>Look more "professional" for enterprise demos</li>
+</ul>
+
+
+<h3 id='17-4-form-design'>17.4 Form Design</h3>
+
+<p>The guided form has 7 fields organized into 4 logical sections:</p>
+
+<ol>
+<li><strong>Project</strong> (text area + text input)</li>
+<li><strong>Deployment & Compliance</strong> (region select + compliance multi-select)</li>
+<li><strong>Scale & Budget</strong> (scale select + budget input)</li>
+<li><strong>Services & Context</strong> (services input + context text area)</li>
+</ol>
+
+
+<p><strong>Why this specific layout?</strong> The form mirrors an Azure Architecture Review conversation:</p>
+<ol>
+<li>"What are you building?" → Project description</li>
+<li>"Where will it run?" → Region + compliance</li>
+<li>"How big is it?" → Scale + budget</li>
+<li>"What do you already know?" → Services + context</li>
+</ol>
+
+
+<p>This natural progression reduces cognitive load and ensures comprehensive requirements.</p>
+
+<h3 id='17-5-progress-streaming-with-callbacks'>17.5 Progress Streaming with Callbacks</h3>
+
+<pre class="code-block"><code class="language-python">def on_agent_done(agent_key: str, info: dict):
+    # Update agent status container with ✅/❌ icon
+    # Update progress bar
+    # Show toast notification
+    st.toast(f"✅ {config['label']} completed in {duration_s:.1f}s")</code></pre>
+
+<p><strong>Why <code class='inline-code'>st.toast</code> for notifications?</strong> Toast notifications are non-blocking — the user sees real-time progress without disrupting their flow. Alternatives considered:</p>
+<ul>
+<li><code class='inline-code'>st.success</code>: Blocks the main area, disrupts layout</li>
+<li><code class='inline-code'>st.spinner</code>: Hides content while loading</li>
+<li>Custom HTML: Requires <code class='inline-code'>unsafe_allow_html=True</code> and manual positioning</li>
+</ul>
+
+
+<h3 id='17-6-results-display'>17.6 Results Display</h3>
+
+<p>The results page has 5 sections:</p>
+
+<ol>
+<li><strong>Summary Banner</strong>: Gradient background with session ID and metrics</li>
+<li><strong>KPI Cards</strong>: Total time, conflicts, artifacts, status</li>
+<li><strong>Latency Breakdown</strong>: 4-column timing display per agent</li>
+<li><strong>Agent Tabs</strong>: 4 tabs with rendered summaries (not raw JSON)</li>
+<li><strong>Judge's Verdict</strong>: Green gradient card with final recommendation</li>
+<li><strong>Conflicts</strong>: Expandable conflict cards</li>
+<li><strong>Artifacts</strong>: 5 tabs (IaC Bicep, IaC Terraform, Cost, Compliance, Rationale)</li>
+</ol>
+
+
+<p><strong>Why tabs for agents instead of accordions or cards?</strong> The 4 agent outputs are best consumed side-by-side — the user might want to compare Architect's recommendations with Cost's evaluation. Tabs allow quick switching without excessive scrolling.</p>
+
+<hr class="section-divider">
+
+<h2 id='18-testing-strategy'>18. Testing Strategy</h2>
+
+<h3 id='18-1-test-coverage-205-tests'>18.1 Test Coverage (205+ Tests)</h3>
+
+<table><thead><tr><th>Test File</th><th>Tests</th><th>What It Tests</th></tr></thead><tbody>
+<tr><td><code class='inline-code'>test_agent_schemas.py</code></td><td>25</td><td>JSON extraction, Pydantic validation, all 5 schemas</td></tr>
+<tr><td><code class='inline-code'>test_llm_cache.py</code></td><td>45</td><td>Cache operations, TTL, eviction, disk persistence, raw API</td></tr>
+<tr><td><code class='inline-code'>test_observability.py</code></td><td>32</td><td>Tracer events, audit logging, metrics collection, OTel export</td></tr>
+<tr><td><code class='inline-code'>test_dashboard_helpers.py</code></td><td>20</td><td>Prompt assembly, summary rendering, sanitization</td></tr>
+<tr><td><code class='inline-code'>test_health.py</code></td><td>18</td><td>Registry pattern, check registration, uptime tracking</td></tr>
+<tr><td><code class='inline-code'>test_compliance.py</code></td><td>12</td><td>Region matching, framework coverage, case insensitivity</td></tr>
+<tr><td><code class='inline-code'>test_models.py</code></td><td>7</td><td>Pydantic model creation, enum values, default factories</td></tr>
+<tr><td><code class='inline-code'>test_orchestrator.py</code></td><td>10</td><td>Session lifecycle, conflict detection, artifact generation</td></tr>
+<tr><td><code class='inline-code'>test_pricing.py</code></td><td>18</td><td>Region resolution, VM pricing, storage costs, comparisons</td></tr>
+<tr><td><code class='inline-code'>test_sentry.py</code></td><td>15</td><td>Init, capture, before_send sanitization, breadcrumbs</td></tr>
+<tr><td><code class='inline-code'>test_agent_base.py</code></td><td>~4</td><td>BaseAgent creation, mock execution</td></tr>
+</tbody></table>
+
+
+<h3 id='18-2-test-design-principles'>18.2 Test Design Principles</h3>
+
+<ol>
+<li><strong>No API calls in tests</strong>: Tests use <code class='inline-code'>DEMO_MODE=true</code> (mock responses) so they run offline</li>
+<li><strong>No external dependencies</strong>: No Sentry DSN, no Azure subscription, no NVIDIA API key</li>
+<li><strong>Deterministic</strong>: Same seed produces same results</li>
+<li><strong>Fast</strong>: Full suite completes in < 5 seconds</li>
+<li><strong>Isolated</strong>: Each test creates fresh instances via <code class='inline-code'>setup_method</code></li>
+</ol>
+
+
+<h3 id='18-3-mock-strategy'>18.3 Mock Strategy</h3>
+
+<pre class="code-block"><code class="language-python"># src/core/nvidia_client.py
+class NVIDIAClient:
+    """Mock client that always returns instant demo responses."""
+    def chat_completion(self, messages, temperature=0.2, max_tokens=2048):
+        return self._mock_response(messages)</code></pre>
+
+<p><strong>Why a separate mock client instead of patching in tests?</strong> Two reasons:</p>
+
+<ol>
+<li><strong>The mock is part of the application, not just tests</strong>: The <code class='inline-code'>DEMO_MODE=true</code> config path uses the mock client in production (for demos without API keys). It's not just a test utility — it's a feature.</li>
+</ol>
+
+
+<ol>
+<li><strong>Mock responses test agent schemas</strong>: Each mock response (<code class='inline-code'>_mock_architect()</code>, <code class='inline-code'>_mock_cost()</code>, etc.) returns valid JSON matching the Pydantic schema. If the schema changes, the mock must change too — this catches schema breakage during development.</li>
+</ol>
+
+
+<h3 id='18-4-integration-tests'>18.4 Integration Tests</h3>
+
+<pre class="code-block"><code class="language-python">@pytest.mark.asyncio
+async def test_full_session_flow(orch):
+    """Run a complete end-to-end session and verify output artifacts."""
+    session = orch.create_session()
+    orch.add_requirement(session.id, "Test HIPAA-compliant storage in India", "india")
+    
+    turns = await orch.run_all_agents(session.id)
+    assert len(turns) == 4
+    assert all(t.status == "completed" for t in turns)
+    
+    arb = await orch.run_judge(session.id)
+    assert arb.final_recommendation
+    
+    artifacts = orch.generate_artifacts(session.id)
+    assert len(artifacts) == 5  # Bicep, Terraform, Cost, Compliance, Rationale</code></pre>
+
+<p>This single test exercises the entire pipeline: session creation → agent execution → conflict detection → arbitration → artifact generation. If any component breaks, this test catches it immediately.</p>
+
+<hr class="section-divider">
+
+<h2 id='19-deployment-architecture'>19. Deployment Architecture</h2>
+
+<h3 id='19-1-current-streamlit-community-cloud'>19.1 Current: Streamlit Community Cloud</h3>
+
+<pre class="code-block"><code class="language-">GitHub Repository (G-Narendra/CloudOptima)
+        │
+        ├── Push to main branch
+        │
+        ▼
+Streamlit Community Cloud (Free)
+    ├── cloudoptima.streamlit.app
+    ├── Auto-deploys from GitHub
+    ├── Secrets: .env variables
+    └── Compute: Free tier (1 CPU, 1GB RAM)</code></pre>
+
+<p><strong>Why start with Streamlit Cloud?</strong> For a student project with $100 Azure credits:</p>
+<ol>
+<li><strong>Free hosting</strong>: No compute cost</li>
+<li><strong>Auto-deploy</strong>: Push to GitHub → live in 2 minutes</li>
+<li><strong>Secrets management</strong>: Built-in .env support</li>
+<li><strong>Demonstration-ready</strong>: Custom domain, SSL, global CDN</li>
+</ol>
+
+
+<h3 id='19-2-target-azure-container-apps'>19.2 Target: Azure Container Apps</h3>
+
+<pre class="code-block"><code class="language-">GitHub Repository
+        │
+        ▼
+GitHub Actions
+    ├── Build Docker image
+    ├── Push to Azure Container Registry
+    └── Deploy to Azure Container Apps
+                │
+                ▼
+Azure Container Apps (Consumption Plan)
+    ├── Auto-scales to zero ($0 when idle)
+    ├── 0.25-1.0 CPU, 0.5-2GB RAM
+    ├── Public ingress via *.azurecontainerapps.io
+    └── Secrets via Azure Key Vault</code></pre>
+
+<p><strong>Why Container Apps over App Service?</strong></p>
+
+<table><thead><tr><th>Aspect</th><th>Container Apps</th><th>App Service (F1 Free)</th></tr></thead><tbody>
+<tr><td><strong>Docker support</strong></td><td>✅ Native (Linux containers)</td><td>❌ Windows only</td></tr>
+<tr><td><strong>Minimum cost</strong></td><td>Scales to zero ($0)</td><td>Fixed capacity (no scale-to-zero)</td></tr>
+<tr><td><strong>CPU limits</strong></td><td>0.25-4.0 CPU</td><td>0.5-1.0 CPU (Linux)</td></tr>
+<tr><td><strong>Auto-scaling</strong></td><td>KEDA-based (event-driven)</td><td>Fixed rules only</td></tr>
+<tr><td><strong>Deployment</strong></td><td>Docker image (any registry)</td><td>Git/zip/FTP</td></tr>
+</tbody></table>
+
+
+<p>App Service Free tier (F1) is Windows-only — it cannot run our Docker container. Container Apps Consumption plan scales to zero when idle, costing nearly $0 for demo usage.</p>
+
+<h3 id='19-3-dockerfile-design'>19.3 Dockerfile Design</h3>
+
+<pre class="code-block"><code class="language-dockerfile"># Multi-stage build
+FROM python:3.12-slim AS builder
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+FROM python:3.12-slim
+COPY --from=builder /root/.local /root/.local
+COPY --chown=appuser:appgroup . .
+USER appuser
+EXPOSE 8501
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD python -c "import socket; s=socket.socket(); s.connect(('localhost',8501)); s.close()"
+CMD ["streamlit", "run", "dashboard.py", "--server.port=8501", "--server.address=0.0.0.0"]</code></pre>
+
+<p><strong>Why multi-stage build?</strong> Multi-stage builds:</p>
+<ol>
+<li><strong>Reduce image size</strong>: Builder stage has <code class='inline-code'>gcc</code> for compiling native extensions; runtime stage only has <code class='inline-code'>python:3.12-slim</code> (no build tools)</li>
+<li><strong>Improve security</strong>: Smaller attack surface (no compilers, no build artifacts)</li>
+<li><strong>Faster deployments</strong>: ~200MB vs ~500MB for a single-stage build</li>
+</ol>
+
+
+<p><strong>Why non-root user?</strong> Security best practice — the container runs as <code class='inline-code'>appuser</code> (UID 1001) instead of <code class='inline-code'>root</code>. If the container is compromised, the attacker has limited permissions:</p>
+<ul>
+<li>Cannot install system packages</li>
+<li>Cannot modify application files</li>
+<li>Cannot access other containers on the same host</li>
+</ul>
+
+
+<p><strong>Why a health check?</strong> Azure Container Apps needs health checks for:</p>
+<ul>
+<li>Determining if the container is ready (startup probe)</li>
+<li>Replacing failed containers (liveness probe)</li>
+<li>Zero-downtime deployments (readiness probe)</li>
+</ul>
+
+
+<hr class="section-divider">
+
+<h2 id='20-why-multi-agent-a-comparative-analysis'>20. Why Multi-Agent? — A Comparative Analysis</h2>
+
+<h3 id='20-1-single-agent-vs-multi-agent'>20.1 Single-Agent vs Multi-Agent</h3>
+
+<table><thead><tr><th>Scenario</th><th>Single Agent</th><th>Multi-Agent (CloudOptima)</th></tr></thead><tbody>
+<tr><td><strong>Cost analysis</strong></td><td>"Here's an architecture with estimated costs"</td><td>4 specialists each analyze + Judge resolves conflicts</td></tr>
+<tr><td><strong>Errors</strong></td><td>One bad response = total failure</td><td>Other agents + Judge catch errors</td></tr>
+<tr><td><strong>Conflicts</strong></td><td>Silently ignored (single model averages)</td><td>Explicitly detected and resolved</td></tr>
+<tr><td><strong>Expertise</strong></td><td>Shallow across all domains</td><td>Deep in each domain</td></tr>
+<tr><td><strong>Traceability</strong></td><td>Black box</td><td>Every decision logged with rationale</td></tr>
+<tr><td><strong>Extensibility</strong></td><td>Must retrain/re-prompt the whole model</td><td>Add one agent at a time</td></tr>
+</tbody></table>
+
+
+<h3 id='20-2-why-5-agents-specifically'>20.2 Why 5 Agents Specifically?</h3>
+
+<p><strong>Minimum viable set:</strong> The 4 Review agents (Architect, Cost, Security, Compliance) correspond to the 4 non-people Azure Well-Architected Framework pillars. The 5th agent (Judge) is the arbitration layer.</p>
+
+<p><strong>Why not 3 agents?</strong> 3 agents would cover only <code class='inline-code'>C(3,2) = 3</code> conflict pairs — missing critical tensions like Security vs Compliance.</p>
+
+<p><strong>Why not 10 agents?</strong> More agents means:</p>
+<ul>
+<li>More LLM calls (higher latency and cost)</li>
+<li>More conflict pairs (<code class='inline-code'>C(10,2) = 45</code>)</li>
+<li>More context for the Judge (token limits)</li>
+<li>Diminishing returns in architecture quality</li>
+</ul>
+
+
+<p>Empirically, 5 agents is the sweet spot where each agent has a distinct, non-overlapping domain.</p>
+
+<h3 id='20-3-comparison-with-other-multi-agent-frameworks'>20.3 Comparison with Other Multi-Agent Frameworks</h3>
+
+<table><thead><tr><th>Framework</th><th>Approach</th><th>Differences from CloudOptima</th></tr></thead><tbody>
+<tr><td><strong>AutoGen (Microsoft)</strong></td><td>Conversational agents</td><td>Agents communicate freely; CloudOptima uses structured prompts + Pydantic schemas</td></tr>
+<tr><td><strong>LangGraph</strong></td><td>Graph-based workflows</td><td>More flexible but more complex; CloudOptima is linear (simpler)</td></tr>
+<tr><td><strong>CrewAI</strong></td><td>Role-based agents</td><td>Similar philosophy; CrewAI handles tool use; CloudOptima focuses on structured analysis</td></tr>
+<tr><td><strong>MetaGPT</strong></td><td>Software engineering agents</td><td>Different domain (code vs cloud); MetaGPT uses product manager → architect → engineer</td></tr>
+<tr><td><strong>ChatDev</strong></td><td>Software company simulation</td><td>Chat-based collaboration; CloudOptima uses adversarial arbitration</td></tr>
+</tbody></table>
+
+
+<p><strong>CloudOptima's unique contribution:</strong></p>
+<ol>
+<li><strong>Adversarial arbitration</strong> over consensus/voting</li>
+<li><strong>Pydantic-validated structured outputs</strong> over free-form LLM responses</li>
+<li><strong>Domain-specific prompts</strong> with exact JSON schema requirements</li>
+<li><strong>RAG-enhanced compliance checking</strong> with curated regulatory knowledge</li>
+<li><strong>Callback hooks</strong> for real-time streaming in Streamlit</li>
+</ol>
+
+
+<hr class="section-divider">
+
+<h2 id='21-design-decisions-full-trade-off-analysis'>21. Design Decisions: Full Trade-off Analysis</h2>
+
+<h3 id='21-1-sequential-vs-parallel-agent-execution'>21.1 Sequential vs Parallel Agent Execution</h3>
+
+<p><strong>Decision</strong>: Sequential (current) / Future: Parallel</p>
+
+<table><thead><tr><th>Factor</th><th>Sequential (Chosen)</th><th>Parallel</th></tr></thead><tbody>
+<tr><td><strong>Conflict detection</strong></td><td>Agents see previous outputs? No (they run independently)</td><td>Same</td></tr>
+<tr><td><strong>Latency</strong></td><td>Sum of all agents (10-60s)</td><td>Max of all agents (3-15s)</td></tr>
+<tr><td><strong>Rate limits</strong></td><td>1 call at a time</td><td>Multiple concurrent calls</td></tr>
+<tr><td><strong>Complexity</strong></td><td>Simple loop</td><td>Need asyncio.gather + error isolation</td></tr>
+<tr><td><strong>Debugging</strong></td><td>Easy (one agent at a time)</td><td>Harder (concurrent failures)</td></tr>
+</tbody></table>
+
+
+<p><strong>Why sequential for now?</strong></p>
+<ol>
+<li>NVIDIA's free tier rate limits (~60 RPM) make parallel calls risky</li>
+<li>Sequential execution isolates agent failures (one fails, others complete)</li>
+<li>The mock client (demo mode) returns instantly, making parallelism unnecessary</li>
+</ol>
+
+
+<p><strong>When to switch to parallel:</strong> When rate limits are no longer a constraint (paid API keys, self-hosted models).</p>
+
+<h3 id='21-2-adversarial-arbitration-vs-consensus'>21.2 Adversarial Arbitration vs Consensus</h3>
+
+<p><strong>Decision</strong>: Adversarial arbitration (explicit conflict resolution)</p>
+
+<table><thead><tr><th>Factor</th><th>Adversarial (Chosen)</th><th>Consensus (Vote/Average)</th></tr></thead><tbody>
+<tr><td><strong>Quality</strong></td><td>Each position defended</td><td>Positions are averaged</td></tr>
+<tr><td><strong>Traceability</strong></td><td>Every conflict documented</td><td>No trace of disagreement</td></tr>
+<tr><td><strong>Edge cases</strong></td><td>Handled explicitly</td><td>Lost in averaging</td></tr>
+<tr><td><strong>Complexity</strong></td><td>Judge prompt is complex</td><td>Simple majority logic</td></tr>
+<tr><td><strong>Confidence</strong></td><td>Know which agent was overruled</td><td>Don't know if the consensus is correct</td></tr>
+</tbody></table>
+
+
+<p><strong>Why adversarial is better for cloud architecture:</strong> In cloud architecture, conflicts are real — using GRS when DPDP requires LRS is a literal regulatory violation. Averaging positions would give a "partial GRS, partial LRS" recommendation that neither satisfies compliance nor provides redundancy.</p>
+
+<h3 id='21-3-json-code-fences-vs-plain-text'>21.3 JSON Code Fences vs Plain Text</h3>
+
+<p><strong>Decision</strong>: Output JSON in <code class='inline-code'>\\</code>\<code class='inline-code'>\\</code>\`json blocks</p>
+
+<table><thead><tr><th>Factor</th><th>Code Fences (Chosen)</th><th>Pure JSON</th><th>Markdown Tables</th></tr></thead><tbody>
+<tr><td><strong>LLM compliance</strong></td><td>95%+ success</td><td>~70% (injects extra text)</td><td>~60% (struggles with tables)</td></tr>
+<tr><td><strong>Human readability</strong></td><td>Moderate</td><td>Low</td><td>High</td></tr>
+<tr><td><strong>Parser complexity</strong></td><td>Easy (split on backticks)</td><td>Harder (find JSON among text)</td><td>Complex (table → JSON transform)</td></tr>
+<tr><td><strong>Schema validation</strong></td><td>Same JSON regardless</td><td>Same JSON regardless</td><td>Need table schema separately</td></tr>
+</tbody></table>
+
+
+<p>Code fences win because LLMs are trained to output JSON in this format. The <code class='inline-code'>extract_json_from_llm_output()</code> function handles the extraction.</p>
+
+<h3 id='21-4-disk-persisted-cache-vs-in-memory-only'>21.4 Disk-Persisted Cache vs In-Memory Only</h3>
+
+<p><strong>Decision</strong>: Disk-persisted (survives restarts)</p>
+
+<table><thead><tr><th>Factor</th><th>Disk-Persisted (Chosen)</th><th>In-Memory Only</th></tr></thead><tbody>
+<tr><td><strong>Survives restart</strong></td><td>✅ Yes</td><td>❌ Lost</td></tr>
+<tr><td><strong>Survives crash</strong></td><td>✅ Yes (only last write)</td><td>❌ Lost</td></tr>
+<tr><td><strong>Write latency</strong></td><td>~5-10ms per write</td><td>~0ms</td></tr>
+<tr><td><strong>Code complexity</strong></td><td>~50 lines (save/load)</td><td>None</td></tr>
+<tr><td><strong>Disk usage</strong></td><td>~1MB for 1000 entries</td><td>0MB</td></tr>
+</tbody></table>
+
+
+<p>The complexity cost (~50 lines) is minimal relative to the benefit: cache entries survive redeployments, which means users don't experience cold starts after every code push.</p>
+
+<h3 id='21-5-uuid-session-ids-vs-sequential-ids'>21.5 UUID Session IDs vs Sequential IDs</h3>
+
+<p><strong>Decision</strong>: UUID-based (with prefix)</p>
+
+<table><thead><tr><th>Factor</th><th>UUID (Chosen)</th><th>Sequential</th><th>Timestamp</th></tr></thead><tbody>
+<tr><td><strong>Collision probability</strong></td><td>~0%</td><td>0% (with locking)</td><td>~5% under load</td></tr>
+<tr><td><strong>Predictable</strong></td><td>No (can't guess)</td><td>Yes (can enumerate)</td><td>Somewhat</td></tr>
+<tr><td><strong>Human-readable</strong></td><td><code class='inline-code'>session_a7b7d2c61fc0</code></td><td><code class='inline-code'>session_42</code></td><td><code class='inline-code'>session_20240725_143022</code></td></tr>
+<tr><td><strong>Database performance</strong></td><td>Slower (random insertion)</td><td>Fastest</td><td>Fast (sequential)</td></tr>
+</tbody></table>
+
+
+<p>UUIDs were chosen after <code class='inline-code'>timestamp</code> IDs caused collisions during rapid session creation in testing.</p>
+
+<h3 id='21-6-2000-char-truncation-vs-full-output'>21.6 2000-char Truncation vs Full Output</h3>
+
+<p><strong>Decision</strong>: Truncate agent outputs to 2000 chars for Judge context</p>
+
+<table><thead><tr><th>Factor</th><th>Truncated (Chosen)</th><th>Full Output</th></tr></thead><tbody>
+<tr><td><strong>Token usage</strong></td><td>~500 tokens per agent</td><td>~2000+ tokens per agent</td></tr>
+<tr><td><strong>Information loss</strong></td><td>Loses details</td><td>Full information</td></tr>
+<tr><td><strong>Judge quality</strong></td><td>Good (sufficient for conflict resolution)</td><td>Better (all details available)</td></tr>
+<tr><td><strong>Cost per session</strong></td><td>~2000 tokens</td><td>~8000+ tokens</td></tr>
+</tbody></table>
+
+
+<p>The median agent output in demo mode is ~800 characters. A real LLM output might be 2000-4000 characters. Truncating to 2000 captures most decisions while keeping token costs manageable.</p>
+
+<h3 id='21-7-pydantic-validation-vs-regex-parsing'>21.7 Pydantic Validation vs Regex Parsing</h3>
+
+<p><strong>Decision</strong>: Pydantic (over initial regex approach)</p>
+
+<p>This was an actual migration in the project. Initially, agent outputs were parsed with regex:</p>
+
+<pre class="code-block"><code class="language-python"># OLD: Regex approach (brittle)
+import re
+cost_match = re.search(r'"estimated_monthly_cost":\s*"([^"]+)"', output)
+if cost_match:
+    cost = cost_match.group(1)</code></pre>
+
+<p>Problems with regex:</p>
+<ol>
+<li><strong>Brittle</strong>: A slight change in JSON formatting breaks the regex</li>
+<li><strong>No type safety</strong>: All values are strings</li>
+<li><strong>Missing field?</strong>: Silent <code class='inline-code'>None</code> return — no error handling</li>
+<li><strong>Nested objects</strong>: Regex can't handle nested JSON gracefully</li>
+<li><strong>Maintenance</strong>: 4 agents × 10+ fields = 40+ regex patterns</li>
+</ol>
+
+
+<p><strong>Pydantic solution:</strong></p>
+<pre class="code-block"><code class="language-python"># NEW: Pydantic approach (typed, validated)
+parsed = json.loads(output)
+validated = CostResponse.model_validate(parsed)
+cost = validated.analysis.estimated_monthly_cost  # str, guaranteed by schema</code></pre>
+
+<p>Benefits:</p>
+<ol>
+<li><strong>Type safety</strong>: Every field has a defined type (str, int, list, etc.)</li>
+<li><strong>Default values</strong>: Missing fields get empty defaults instead of crashes</li>
+<li><strong>Nested validation</strong>: Deeply nested objects validated at every level</li>
+<li><strong>Error logging</strong>: <code class='inline-code'>ValidationError</code> is caught and logged, not silently swallowed</li>
+<li><strong>Extensible</strong>: Adding a field to the schema is adding one line to a Pydantic model</li>
+</ol>
+
+
+<hr class="section-divider">
+
+<h2 id='22-performance-benchmarks'>22. Performance Benchmarks</h2>
+
+<h3 id='22-1-demo-mode-mock-responses'>22.1 Demo Mode (Mock Responses)</h3>
+
+<table><thead><tr><th>Operation</th><th>Average</th><th>P95</th><th>P99</th></tr></thead><tbody>
+<tr><td>Full session (4 agents + Judge)</td><td>0.5s</td><td>0.8s</td><td>1.2s</td></tr>
+<tr><td>Single agent turn</td><td>0.05s</td><td>0.1s</td><td>0.2s</td></tr>
+<tr><td>Artifact generation</td><td>0.01s</td><td>0.02s</td><td>0.05s</td></tr>
+<tr><td>Cache lookup (hit)</td><td>0.001s</td><td>0.002s</td><td>0.005s</td></tr>
+<tr><td>Cache lookup (miss)</td><td>0.003s</td><td>0.005s</td><td>0.01s</td></tr>
+<tr><td>Health check</td><td>0.002s</td><td>0.003s</td><td>0.005s</td></tr>
+</tbody></table>
+
+
+<h3 id='22-2-live-mode-nvidia-nims-api'>22.2 Live Mode (NVIDIA NIMs API)</h3>
+
+<table><thead><tr><th>Operation</th><th>Average</th><th>P95</th><th>P99</th></tr></thead><tbody>
+<tr><td>Full session (4 agents + Judge)</td><td>45s</td><td>90s</td><td>120s</td></tr>
+<tr><td>Single LLM call (Mistral Small)</td><td>5s</td><td>12s</td><td>20s</td></tr>
+<tr><td>Azure Prices API query</td><td>0.8s</td><td>1.5s</td><td>3s</td></tr>
+<tr><td>Cache save to disk</td><td>0.01s</td><td>0.02s</td><td>0.05s</td></tr>
+</tbody></table>
+
+
+<h3 id='22-3-test-suite'>22.3 Test Suite</h3>
+
+<table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>
+<tr><td>Total tests</td><td>205+</td></tr>
+<tr><td>Test suite runtime</td><td>~3s</td></tr>
+<tr><td>Test files</td><td>11</td></tr>
+<tr><td>Code coverage (src/core/)</td><td>85%+</td></tr>
+<tr><td>Slowest test</td><td><code class='inline-code'>test_full_session_flow</code> (~1s)</td></tr>
+</tbody></table>
+
+
+<hr class="section-divider">
+
+<h2 id='23-appendix-complete-file-reference'>23. Appendix: Complete File Reference</h2>
+
+<h3 id='23-1-file-map'>23.1 File Map</h3>
+
+<pre class="code-block"><code class="language-">cloudoptima/
+│
+├── dashboard.py                    # MAIN ENTRY POINT — Streamlit app (1100+ lines)
+├── run.py                          # CLI/API entry point
+│
+├── src/                            # Application source code
+│   ├── __init__.py
+│   ├── config.py                   # Pydantic Settings (env vars)
+│   │
+│   ├── core/                       # Core business logic
+│   │   ├── __init__.py
+│   │   ├── models.py               # 11 Pydantic data models
+│   │   ├── agent_base.py           # BaseAgent + 5 system prompts
+│   │   ├── agent_schemas.py        # 5 Pydantic validation schemas
+│   │   ├── orchestrator.py         # Session lifecycle orchestrator
+│   │   ├── nvidia_client.py        # Mock/demo LLM client
+│   │   ├── llm_client.py           # Multi-provider LLM abstraction
+│   │   ├── llm_cache.py            # SHA256-cached, disk-persisted
+│   │   ├── azure_prices_api.py     # Live Azure pricing API client
+│   │   ├── azure_pricing.py        # Static pricing database
+│   │   ├── compliance_rules.py     # 21 structured compliance rules
+│   │   ├── health.py               # Health check registry
+│   │   ├── sanitize.py             # Input sanitization
+│   │   ├── sentry.py               # Sentry error tracking
+│   │   └── observability.py        # Tracer, Audit, Metrics
+│   │
+│   └── agents/                     # Extensible agent package
+│       └── __init__.py
+│
+├── tests/                          # 205+ tests across 11 files
+│   ├── test_agent_schemas.py       # 25 tests
+│   ├── test_compliance.py          # 12 tests
+│   ├── test_dashboard_helpers.py   # 20 tests
+│   ├── test_health.py              # 18 tests
+│   ├── test_llm_cache.py           # 45 tests
+│   ├── test_models.py              # 7 tests
+│   ├── test_observability.py       # 32 tests
+│   ├── test_orchestrator.py        # 10 tests
+│   ├── test_pricing.py             # 18 tests
+│   ├── test_sentry.py              # 15 tests
+│   └── __init__.py
+│
+├── deploy/                         # Azure deployment scripts
+│   ├── README.md
+│   ├── build-and-push.sh           # Docker build + push script
+│   └── deploy.sh                   # Azure Container Apps deploy script
+│
+├── scripts/
+│   └── export_pdf.py               # Markdown → PDF converter
+│
+├── docs/
+│   └── CLOUDOPTIMA_MASTER_GUIDE.md # YOU ARE HERE
+│
+├── .env.example                    # Environment template
+├── .gitignore
+├── requirements.txt                # 13 dependencies
+├── pyproject.toml                  # Project metadata + tool config
+├── Dockerfile                      # Multi-stage build
+├── docker-compose.yml              # Local dev container
+├── pytest.ini                      # Pytest configuration
+├── README.md                       # Project README
+├── CONTRIBUTING.md                 # Contributor guide
+└── test_api_live.py                # Pre-deployment verification</code></pre>
+
+<h3 id='23-2-key-metrics'>23.2 Key Metrics</h3>
+
+<table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>
+<tr><td>Total Python files</td><td>28</td></tr>
+<tr><td>Total lines of code</td><td>~8,000</td></tr>
+<tr><td>Dependencies</td><td>13 direct (7 core + 5 utilities + 1 test)</td></tr>
+<tr><td>Test coverage</td><td>85%+ (src/core/)</td></tr>
+<tr><td>Session states</td><td>12</td></tr>
+<tr><td>Conflict dimensions</td><td>6</td></tr>
+<tr><td>Compliance rules</td><td>21</td></tr>
+<tr><td>Azure regions covered</td><td>4</td></tr>
+<tr><td>VM SKUs in pricing DB</td><td>100+</td></tr>
+<tr><td>LLM providers supported</td><td>5</td></tr>
+</tbody></table>
+
+
+<hr class="section-divider">
+
+
+<hr class="section-divider">
+
+<h2 id='24-team-onboarding-guide'>24. Team Onboarding Guide</h2>
+
+<blockquote><strong>For new team members joining the CloudOptima collaboration. Read this first.</strong></blockquote>
+
+<h3 id='24-1-team-structure'>24.1 Team Structure</h3>
+
+<table><thead><tr><th>Role</th><th>Who</th><th>Primary Responsibilities</th></tr></thead><tbody>
+<tr><td><strong>Lead Architect</strong></td><td>You (Project Lead)</td><td>Architecture decisions, code review gatekeeper, stakeholder communication, roadmap prioritization, final arbitration on design choices</td></tr>
+<tr><td><strong>Microsoft Engineer 1</strong></td><td>Azure Infra Specialist</td><td>Azure OpenAI Service integration, CI/CD pipelines, Azure Monitor/App Insights, Microsoft Defender for Cloud</td></tr>
+<tr><td><strong>Microsoft Engineer 2</strong></td><td>Cloud Security/Compliance</td><td>Azure AD / Entra ID auth, Azure Policy, Compliance automation, Cost Management API, Azure API Management</td></tr>
+<tr><td><strong>Student 1</strong></td><td>Backend/Frontend Developer</td><td>Core Python (agent_base, orchestrator, models), Streamlit dashboard improvements, unit tests</td></tr>
+<tr><td><strong>Student 2</strong></td><td>Data/ML Engineer</td><td>RAG compliance engine, LLM cache, prompt engineering, test coverage expansion, documentation</td></tr>
+</tbody></table>
+
+<h3 id='24-2-first-week-checklist'>24.2 First-Week Checklist</h3>
+
+<table><thead><tr><th>Day</th><th>Task</th><th>Details</th></tr></thead><tbody>
+<tr><td><strong>Day 1</strong></td><td>Environment Setup</td><td>Clone repo, install Python 3.12+, create venv, <code>pip install -r requirements.txt</code>, copy <code>.env.example</code> to <code>.env</code></td></tr>
+<tr><td><strong>Day 1</strong></td><td>Run Locally</td><td><code>streamlit run dashboard.py</code> - verify UI loads. Run <code>python run.py</code> - verify CLI works</td></tr>
+<tr><td><strong>Day 2</strong></td><td>Read Key Modules</td><td>Read through <code>models.py</code>, <code>agent_base.py</code>, <code>agent_schemas.py</code>, <code>orchestrator.py</code> in order</td></tr>
+<tr><td><strong>Day 2</strong></td><td>Run Tests</td><td><code>pytest tests/ -v</code> - all ~200 tests should pass. Fix any failures</td></tr>
+<tr><td><strong>Day 3</strong></td><td>Run a Demo Session</td><td>Open dashboard, enter a sample request, observe agent execution flow end-to-end</td></tr>
+<tr><td><strong>Day 3</strong></td><td>First Small PR</td><td>Fix a TODO, improve a test, or add a docstring. Get familiar with the PR workflow (Section 28)</td></tr>
+<tr><td><strong>Day 4</strong></td><td>Read Architecture Guide</td><td>Read the Master Guide (this document) sections 1-23 to understand full system design</td></tr>
+<tr><td><strong>Day 5</strong></td><td>Pick a Task from Roadmap</td><td>Select a Phase 1 task from Section 25 and start implementation with a design brief</td></tr>
+</tbody></table>
+
+<h3 id='24-3-development-environment'>24.3 Development Environment</h3>
+
+<h4 id='required-tools'>Required Tools</h4>
+<ul>
+<li><strong>Python 3.12+</strong> - Core runtime</li>
+<li><strong>Git + GitHub Desktop (optional)</strong> - Version control</li>
+<li><strong>VS Code</strong> - Recommended IDE (with Python, Pylance, and GitLens extensions)</li>
+<li><strong>Docker Desktop</strong> - For local container testing (deploy/ directory)</li>
+<li><strong>Streamlit</strong> - UI framework (runs locally via <code>streamlit run dashboard.py</code>)</li>
+</ul>
+
+<h4 id='environment-variables'>Environment Variables (.env)</h4>
+<table><thead><tr><th>Variable</th><th>Required</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>NVIDIA_API_KEY</code></td><td>For live LLM calls</td><td>NVIDIA NIMs API key (get from build.nvidia.com)</td></tr>
+<tr><td><code>SENTRY_DSN</code></td><td>Optional</td><td>Error tracking (set up a free Sentry project)</td></tr>
+<tr><td><code>DEMO_MODE</code></td><td>Defaults to <code>true</code></td><td>Set to <code>true</code> to use mock data (no API key needed)</td></tr>
+<tr><td><code>LOG_LEVEL</code></td><td>Defaults to <code>INFO</code></td><td>Set to <code>DEBUG</code> for verbose logging</td></tr>
+</tbody></table>
+
+<h4 id='useful-commands'>Useful Commands</h4>
+<pre class="code-block"><code class="language-bash"># Run the dashboard
+streamlit run dashboard.py
+
+# Run the CLI API server
+python run.py api
+
+# Run all tests
+pytest tests/ -v
+
+# Run a specific test file
+pytest tests/test_orchestrator.py -v
+
+# Run with coverage
+pytest tests/ --cov=src --cov-report=term-missing
+
+# Check code style (if configured)
+ruff check src/
+</code></pre>
+
+
+<hr class="section-divider">
+
+<h2 id='25-roadmap-milestones'>25. Roadmap &amp; Milestones</h2>
+
+<blockquote><strong>Four-phase plan for the CloudOptima team. Each phase has clear deliverables, owners, and success criteria.</strong></blockquote>
+
+<h3 id='25-1-phase-1-stabilize-weeks-1-3'>25.1 Phase 1 - Stabilize (Weeks 1-3)</h3>
+
+<table><thead><tr><th>Task</th><th>Owner</th><th>Effort</th><th>Success Criterion</th></tr></thead><tbody>
+<tr><td><strong>Fix LLM JSON Parsing</strong></td><td>Student 1</td><td>~3 days</td><td>JSON decode failures drop from ~20% to &lt;5%. All 5 agent types produce valid output 95%+ of the time</td></tr>
+<tr><td><strong>Reduce Session Latency</strong></td><td>Student 1 + MS Eng 1</td><td>~4 days</td><td>Total session time under 60 seconds for typical requests (currently ~98s)</td></tr>
+<tr><td><strong>Improve Dashboard UX</strong></td><td>Student 1</td><td>~3 days</td><td>Agent outputs display in human-readable format (not raw JSON). Judge verdict is prominent and clear</td></tr>
+<tr><td><strong>Add Database Persistence</strong></td><td>Student 2</td><td>~5 days</td><td>Sessions survive server restarts. Use SQLite first, then migrate to Cosmos DB (Phase 2)</td></tr>
+<tr><td><strong>Expand Test Coverage</strong></td><td>Student 2</td><td>~3 days</td><td>Test count grows from 205+ to 350+. Coverage exceeds 80% on core modules</td></tr>
+<tr><td><strong>Input Validation Edge Cases</strong></td><td>Student 1</td><td>~2 days</td><td>Boundary testing: empty inputs, malicious payloads, Unicode, extremely long text - all handled gracefully</td></tr>
+</tbody></table>
+
+<p><strong>Phase 1 Milestone:</strong> CloudOptima runs reliably under 60 seconds with &lt;5% error rate. Demo-ready for Microsoft stakeholders.</p>
+
+<h3 id='25-2-phase-2-microsoft-integration-weeks-4-6'>25.2 Phase 2 - Microsoft Integration (Weeks 4-6)</h3>
+
+<table><thead><tr><th>Task</th><th>Owner</th><th>Effort</th><th>Success Criterion</th></tr></thead><tbody>
+<tr><td><strong>Switch to Azure OpenAI Service</strong></td><td>MS Eng 1</td><td>~5 days</td><td>GPT-4o replaces NVIDIA NIMs as default provider. Config-switchable via env var</td></tr>
+<tr><td><strong>Set up Azure DevOps CI/CD</strong></td><td>MS Eng 1</td><td>~3 days</td><td>Every push triggers automated build + test + deploy to Azure Container Apps</td></tr>
+<tr><td><strong>Add Azure AD / Entra ID Auth</strong></td><td>MS Eng 2</td><td>~4 days</td><td>Users sign in with Microsoft accounts. Role-based access (admin, viewer, editor)</td></tr>
+<tr><td><strong>Azure Monitor + App Insights</strong></td><td>MS Eng 1</td><td>~3 days</td><td>Real-time dashboards for latency, error rates, session volume. Alert thresholds configured</td></tr>
+<tr><td><strong>Microsoft Defender for Cloud Scan</strong></td><td>MS Eng 2</td><td>~2 days</td><td>Generated architectures are automatically scanned for security misconfigurations</td></tr>
+<tr><td><strong>Live Cost Management API</strong></td><td>MS Eng 2</td><td>~3 days</td><td>Replace static pricing with live Azure Retail Rates API. Updates cached daily</td></tr>
+</tbody></table>
+
+<p><strong>Phase 2 Milestone:</strong> CloudOptima runs entirely on Azure infrastructure with real Microsoft services. Demo shows Azure-native integration.</p>
+
+<h3 id='25-3-phase-3-production-ready-weeks-7-9'>25.3 Phase 3 - Production-Ready (Weeks 7-9)</h3>
+
+<table><thead><tr><th>Task</th><th>Owner</th><th>Effort</th><th>Success Criterion</th></tr></thead><tbody>
+<tr><td><strong>Cosmos DB Migration</strong></td><td>Student 2 + MS Eng 2</td><td>~5 days</td><td>Session data persists in Cosmos DB. Global replication enabled for multi-region demos</td></tr>
+<tr><td><strong>Azure API Management</strong></td><td>MS Eng 2</td><td>~4 days</td><td>API Gateway with rate limiting, RBAC, usage plans, and developer portal</td></tr>
+<tr><td><strong>Parallel Agent Execution</strong></td><td>Student 1 + MS Eng 1</td><td>~4 days</td><td>Agents run in parallel (asyncio) instead of sequentially. Cut session time by ~60%</td></tr>
+<tr><td><strong>RAG Compliance Engine</strong></td><td>Student 2</td><td>~5 days</td><td>Vector DB (Azure AI Search) with 10+ regulatory documents. Agent queries RAG for less common frameworks</td></tr>
+<tr><td><strong>Multi-Tenancy Support</strong></td><td>All</td><td>~5 days</td><td>Multiple teams can use CloudOptima simultaneously with isolated sessions</td></tr>
+</tbody></table>
+
+<p><strong>Phase 3 Milestone:</strong> CloudOptima is production-grade: scalable, secure, multi-tenant, with real Azure services end-to-end.</p>
+
+<h3 id='25-4-phase-4-advanced-weeks-10-12'>25.4 Phase 4 - Advanced (Weeks 10-12)</h3>
+
+<table><thead><tr><th>Task</th><th>Owner</th><th>Effort</th><th>Success Criterion</th></tr></thead><tbody>
+<tr><td><strong>Real-Time Streaming</strong></td><td>Student 1</td><td>~5 days</td><td>SSE or WebSocket-based real-time agent output streaming to dashboard</td></tr>
+<tr><td><strong>Working Terraform Output</strong></td><td>MS Eng 1</td><td>~4 days</td><td>Generated Terraform configs are syntactically valid and deployable</td></tr>
+<tr><td><strong>Cost Optimization Recommendations</strong></td><td>MS Eng 2</td><td>~3 days</td><td>Reserved Instance / Savings Plan recommendations based on usage patterns</td></tr>
+<tr><td><strong>Sustainability Agent (6th Agent)</strong></td><td>Student 2</td><td>~4 days</td><td>Carbon footprint estimation for each architecture. Recommends green SKUs</td></tr>
+<tr><td><strong>Export to PowerPoint / PDF</strong></td><td>Student 1</td><td>~3 days</td><td>One-click export of architecture report for stakeholder presentations</td></tr>
+</tbody></table>
+
+<p><strong>Phase 4 Milestone:</strong> CloudOptima is a comprehensive, enterprise-grade architecture tool with advanced features.</p>
+
+<h3 id='25-5-risk-mitigation'>25.5 Risk Mitigation</h3>
+
+<table><thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr></thead><tbody>
+<tr><td>LLM API cost overruns</td><td>Medium</td><td>High</td><td>Use cache aggressively (Section 11). Limit to smaller models for Cost/Security agents. Set daily spend caps</td></tr>
+<tr><td>$100 Azure credits insufficient</td><td>Medium</td><td>Medium</td><td>Azure Container Apps consumption plan (~$0/mo for demo). Apply for Azure for Research credits ($5K-$50K)</td></tr>
+<tr><td>Streamlit scaling limitations</td><td>Low</td><td>Medium</td><td>Replace with React frontend in Phase 4. For now, Streamlit handles 50+ concurrent users</td></tr>
+<tr><td>LLM output quality regression</td><td>Medium</td><td>High</td><td>Maintain golden test set of 20+ prompt/response pairs. Run regression tests before every release</td></tr>
+<tr><td>Team member availability gaps</td><td>Medium</td><td>Medium</td><td>Cross-train: each module has at least 2 people familiar with it. Document key decisions</td></tr>
+</tbody></table>
+
+
+<hr class="section-divider">
+
+<h2 id='26-microsoft-integration-points'>26. Microsoft Integration Points</h2>
+
+<blockquote><strong>Specific Azure services and Microsoft tools that the MS engineers on the team can leverage. Each integration has a clear owner, effort estimate, and impact.</strong></blockquote>
+
+<h3 id='26-1-azure-openai-service'>26.1 Azure OpenAI Service</h3>
+
+<p><strong>Owner:</strong> Microsoft Engineer 1 | <strong>Effort:</strong> ~5 days | <strong>Impact:</strong> High</p>
+
+<p><strong>Current:</strong> CloudOptima uses NVIDIA NIMs (OpenAI-compatible API) as the default LLM provider.</p>
+
+<p><strong>Target:</strong> Switch to <strong>Azure OpenAI Service</strong> (GPT-4o, GPT-4-turbo, o1-mini) deployed within the student Azure subscription.</p>
+
+<table><thead><tr><th>Capability</th><th>Current (NVIDIA NIMs)</th><th>Target (Azure OpenAI)</th></tr></thead><tbody>
+<tr><td><strong>Model</strong></td><td>Mistral Small, LLaMA 3</td><td>GPT-4o, GPT-4-turbo, o1-mini</td></tr>
+<tr><td><strong>Latency</strong></td><td>~3-5s per call</td><td>~2-4s per call (Azure regions)</td></tr>
+<tr><td><strong>SLA</strong></td><td>None (free tier)</td><td>99.9% (paid tier)</td></tr>
+<tr><td><strong>Data Residency</strong></td><td>US-based</td><td>UAE North (same as target region)</td></tr>
+<tr><td><strong>Cost</strong></td><td>Free credits</td><td>Pay-as-you-go (~$0.01-0.03 per session)</td></tr>
+<tr><td><strong>Integration</strong></td><td>External API key</td><td>Azure AD auth, no exposed keys</td></tr>
+</tbody></table>
+
+<h3 id='26-2-azure-devops-github-actions'>26.2 Azure DevOps / GitHub Actions</h3>
+
+<p><strong>Owner:</strong> Microsoft Engineer 1 | <strong>Effort:</strong> ~3 days | <strong>Impact:</strong> High</p>
+
+<p><strong>Current:</strong> Manual deployment via shell scripts in <code>deploy/</code>. No automated CI/CD pipeline.</p>
+
+<p><strong>Target:</strong> GitHub Actions workflow that:</p>
+<ol>
+<li>Runs <code>pytest tests/ -v</code> on every push</li>
+<li>Runs Ruff linter + type checker</li>
+<li>Builds Docker image with <code>--platform linux/amd64</code></li>
+<li>Pushes to Azure Container Registry (ACR)</li>
+<li>Deploys to Azure Container Apps with zero-downtime</li>
+</ol>
+
+<h3 id='26-3-azure-ad-entra-id-authentication'>26.3 Azure AD / Entra ID Authentication</h3>
+
+<p><strong>Owner:</strong> Microsoft Engineer 2 | <strong>Effort:</strong> ~4 days | <strong>Impact:</strong> Medium</p>
+
+<p><strong>Current:</strong> No authentication. Anyone with the URL can run sessions.</p>
+
+<p><strong>Target:</strong> Microsoft Entra ID (formerly Azure AD) authentication so only authorized team members can access CloudOptima.</p>
+
+<h3 id='26-4-azure-monitor-application-insights'>26.4 Azure Monitor + Application Insights</h3>
+
+<p><strong>Owner:</strong> Microsoft Engineer 1 | <strong>Effort:</strong> ~3 days | <strong>Impact:</strong> Medium</p>
+
+<p><strong>Current:</strong> Basic observability via <code>observability.py</code> - traces, audit logs, and metrics are written to local files.</p>
+
+<p><strong>Target:</strong> Replace local logging with Azure Monitor + Application Insights for live metrics, distributed traces, and alerts.</p>
+
+<h3 id='26-5-microsoft-defender-for-cloud'>26.5 Microsoft Defender for Cloud</h3>
+
+<p><strong>Owner:</strong> Microsoft Engineer 2 | <strong>Effort:</strong> ~2 days | <strong>Impact:</strong> High</p>
+
+<p><strong>Current:</strong> Security recommendations are LLM-generated and not validated against real Azure security benchmarks.</p>
+
+<p><strong>Target:</strong> After CloudOptima generates an architecture, automatically scan it using Microsoft Defender for Cloud's API to verify security compliance.</p>
+
+<h3 id='26-6-azure-api-management'>26.6 Azure API Management</h3>
+
+<p><strong>Owner:</strong> Microsoft Engineer 2 | <strong>Effort:</strong> ~4 days | <strong>Impact:</strong> Medium</p>
+
+<p><strong>Current:</strong> No API gateway. The Streamlit dashboard communicates directly with the orchestrator.</p>
+
+<p><strong>Target:</strong> Expose CloudOptima as a REST API through Azure API Management with rate limiting, RBAC, and developer portal.</p>
+
+<h3 id='26-7-integration-dependency-graph'>26.7 Integration Dependency Graph</h3>
+
+<pre class="code-block"><code class="language-text">Phase 2
+Azure OpenAI        Replaces NVIDIA NIMs (Day 1)
+Azure DevOps        CI/CD pipeline (Day 2-3)
+  +-- Azure Container Registry     Store Docker images
+  +-- Azure Container Apps         Deployment target
+Entra ID Auth       Auth layer (Day 4-7)
+  +-- Affects dashboard.py + run.py (session.user_id)
+
+Phase 3
+Cosmos DB           Replaces in-memory sessions
+  +-- Depends on Entra ID (user context)
+Azure Monitor       Replaces local observability
+  +-- Instrument orchestrator.py + agent_base.py
+Defender for Cloud  Validates generated IaC
+  +-- New agent output type
+
+Phase 4
+API Management      Exposes REST API
+  +-- Depends on Entra ID + Cosmos DB
+Terraform Output    Requires Bicep - Terraform converter
+Real-Time Streaming Requires SSE/WebSocket support
+</code></pre>
+
+
+<hr class="section-divider">
+
+<h2 id='27-known-limitations-technical-debt'>27. Known Limitations &amp; Technical Debt</h2>
+
+<blockquote><strong>Transparency about what doesn't work well yet. Each item has a severity, workaround, and planned fix.</strong></blockquote>
+
+<h3 id='27-1-llm-output-quality'>27.1 LLM Output Quality</h3>
+
+<table><thead><tr><th>Issue</th><th>Severity</th><th>Frequency</th><th>Workaround</th><th>Planned Fix</th></tr></thead><tbody>
+<tr><td><strong>Malformed JSON from LLM</strong></td><td>HIGH</td><td>~15-20%</td><td>Pydantic defaults fill missing fields</td><td>Switch to Azure OpenAI response_format param</td></tr>
+<tr><td><strong>Agent hallucinates pricing</strong></td><td>MEDIUM</td><td>~10%</td><td>Manual price verification recommended</td><td>Live Azure Retail Prices API integration</td></tr>
+<tr><td><strong>Compliance citations are generic</strong></td><td>MEDIUM</td><td>~30%</td><td>Human review of regulation sections required</td><td>RAG engine with regulatory documents (Phase 2)</td></tr>
+<tr><td><strong>Judge averages instead of picking</strong></td><td>MEDIUM</td><td>~15%</td><td>Prompt includes explicit "do not average" instruction</td><td>Improve prompt with negative examples</td></tr>
+</tbody></table>
+
+<h3 id='27-2-performance'>27.2 Performance</h3>
+
+<table><thead><tr><th>Issue</th><th>Severity</th><th>Impact</th><th>Root Cause</th><th>Planned Fix</th></tr></thead><tbody>
+<tr><td><strong>Total session time &gt;90s</strong></td><td>HIGH</td><td>Poor UX</td><td>Sequential agent execution (5 LLM calls)</td><td>Parallel execution via asyncio (Phase 3)</td></tr>
+<tr><td><strong>No streaming output</strong></td><td>MEDIUM</td><td>Blank screen during processing</td><td>Streamlit sync limitation</td><td>SSE via st.write streaming (Phase 4)</td></tr>
+<tr><td><strong>Dashboard re-render overhead</strong></td><td>MEDIUM</td><td>~2-3s delay</td><td>Streamlit re-runs entire script</td><td>Use st.fragment for targeted re-renders</td></tr>
+<tr><td><strong>Cache not shared across instances</strong></td><td>LOW</td><td>Cache miss on new server</td><td>Disk-persisted cache</td><td>Migrate to Azure Cache for Redis</td></tr>
+</tbody></table>
+
+<h3 id='27-3-architecture-design'>27.3 Architecture &amp; Design</h3>
+
+<table><thead><tr><th>Issue</th><th>Severity</th><th>Impact</th><th>Planned Fix</th></tr></thead><tbody>
+<tr><td><strong>In-memory session storage</strong></td><td>MEDIUM</td><td>Sessions lost on restart</td><td>Cosmos DB migration (Phase 3)</td></tr>
+<tr><td><strong>No authentication</strong></td><td>MEDIUM</td><td>No audit trail per user</td><td>Entra ID auth (Phase 2)</td></tr>
+<tr><td><strong>No rate limiting</strong></td><td>LOW</td><td>Unlimited concurrent sessions</td><td>Azure API Management (Phase 2)</td></tr>
+<tr><td><strong>Mock vs Live mode confusing</strong></td><td>LOW</td><td>Wrong mode used accidentally</td><td>Clear visual indicator in dashboard header</td></tr>
+</tbody></table>
+
+<h3 id='27-4-testing-gaps'>27.4 Testing Gaps</h3>
+
+<table><thead><tr><th>Gap</th><th>Severity</th><th>Impact</th><th>Planned Fix</th></tr></thead><tbody>
+<tr><td><strong>No LLM integration tests</strong></td><td>MEDIUM</td><td>Prompt changes may break output</td><td>Recorded LLM responses (VCR.py pattern)</td></tr>
+<tr><td><strong>No end-to-end browser tests</strong></td><td>MEDIUM</td><td>Dashboard changes break silently</td><td>Playwright tests for critical paths</td></tr>
+<tr><td><strong>No performance benchmarks in CI</strong></td><td>LOW</td><td>Latency regressions</td><td>Add locust/vegeta benchmarks</td></tr>
+<tr><td><strong>Limited negative test coverage</strong></td><td>LOW</td><td>Error paths not tested</td><td>Tests for empty responses, timeouts, invalid input</td></tr>
+</tbody></table>
+
+<h3 id='27-5-ux-shortcomings'>27.5 UX Shortcomings</h3>
+
+<table><thead><tr><th>Issue</th><th>Severity</th><th>Impact</th><th>Planned Fix</th></tr></thead><tbody>
+<tr><td><strong>Agent results as raw JSON</strong></td><td>HIGH</td><td>Users cannot understand outputs</td><td>Human-readable cards (Student 1, Phase 1)</td></tr>
+<tr><td><strong>No progress estimation</strong></td><td>MEDIUM</td><td>Unknown wait time</td><td>Show estimated time per agent</td></tr>
+<tr><td><strong>No session history browser</strong></td><td>MEDIUM</td><td>Results lost on refresh</td><td>Session list sidebar</td></tr>
+<tr><td><strong>Mobile layout broken</strong></td><td>LOW</td><td>Unusable on phones</td><td>Responsive CSS breakpoints</td></tr>
+</tbody></table>
+
+
+<hr class="section-divider">
+
+<h2 id='28-team-workflow-git-strategy'>28. Team Workflow &amp; Git Strategy</h2>
+
+<blockquote><strong>How the 5-person team collaborates on code. Branching strategy, PR workflow, code review standards, and sprint cadence.</strong></blockquote>
+
+<h3 id='28-1-branching-strategy'>28.1 Branching Strategy</h3>
+
+<p>We use a simplified <strong>GitHub Flow</strong> (not Git Flow) because:</p>
+<ul>
+<li>5 people is small enough for trunk-based development</li>
+<li>No need for long-running release branches</li>
+<li>Simplifies CI/CD (every branch gets tested)</li>
+<li>Less merge overhead</li>
+</ul>
+
+<table><thead><tr><th>Branch</th><th>Purpose</th><th>Protection</th></tr></thead><tbody>
+<tr><td><code>main</code></td><td>Production-ready code. Deployed to Azure</td><td>Requires PR review + passing CI</td></tr>
+<tr><td><code>feature/&lt;name&gt;</code></td><td>New feature or bug fix</td><td>None - created from main, merged via PR</td></tr>
+<tr><td><code>docs/&lt;name&gt;</code></td><td>Documentation-only changes</td><td>Same as feature branches</td></tr>
+</tbody></table>
+
+<h3 id='28-2-pull-request-workflow'>28.2 Pull Request Workflow</h3>
+
+<pre class="code-block"><code class="language-text">1. Create a feature branch from main
+   git checkout main && git pull
+   git checkout -b feature/my-task
+
+2. Make changes, commit frequently
+   git add -A && git commit -m "[Area] Description"
+   git push -u origin feature/my-task
+
+3. Open a Pull Request against main
+   - Title: [Area] Brief description
+   - Description: What changed, why, how to test
+   - Reviewers: At least 1 other team member
+
+4. CI runs automatically (pytest + lint)
+5. Code review: At least 1 approval required
+6. Merge: Use "Squash and merge" (clean history)
+7. Delete feature branch after merge
+</code></pre>
+
+<h3 id='28-3-code-review-standards'>28.3 Code Review Standards</h3>
+
+<table><thead><tr><th>Category</th><th>Must Check</th><th>Must NOT Block On</th></tr></thead><tbody>
+<tr><td><strong>Correctness</strong></td><td>Does the code do what it claims? Are edge cases handled?</td><td>-</td></tr>
+<tr><td><strong>Tests</strong></td><td>Are new features tested? Do existing tests pass?</td><td>Line-by-line coverage requirements</td></tr>
+<tr><td><strong>Style</strong></td><td>Does it follow existing conventions? No dead code</td><td>Personal preferences (tabs vs spaces)</td></tr>
+<tr><td><strong>Design</strong></td><td>Is the change consistent with the architecture?</td><td>Perfect abstraction. Good enough is fine</td></tr>
+<tr><td><strong>Security</strong></td><td>Are user inputs sanitized? No hardcoded secrets?</td><td>-</td></tr>
+</tbody></table>
+
+<h3 id='28-4-commit-message-conventions'>28.4 Commit Message Conventions</h3>
+
+<pre class="code-block"><code class="language-text">[Area] Short description under 50 chars
+
+Longer explanation if needed. Wrap at 72 characters.
+Explain WHY, not what (the code shows what).
+
+Areas: [Core], [Agent], [UI], [Docs], [Tests], [Deploy], [Config]
+
+Example:
+[Core] Fix JSON extraction regex for nested objects
+The previous regex stopped at the first closing brace,
+missing nested objects. Used re.DOTALL flag to match
+across newlines.
+</code></pre>
+
+<h3 id='28-5-sprint-cadence'>28.5 Sprint Cadence</h3>
+
+<table><thead><tr><th>Frequency</th><th>Meeting</th><th>Duration</th><th>Agenda</th></tr></thead><tbody>
+<tr><td><strong>Weekly</strong></td><td>Sprint Planning</td><td>30 min</td><td>Pick tasks from Roadmap (Section 25). Assign owners. Set weekly goals</td></tr>
+<tr><td><strong>Weekly</strong></td><td>Standup (async)</td><td>5 min each</td><td>What I did yesterday, what I'll do today, blockers</td></tr>
+<tr><td><strong>Bi-weekly</strong></td><td>Demo &amp; Review</td><td>45 min</td><td>Show working progress. Stakeholder feedback. Adjust roadmap</td></tr>
+<tr><td><strong>Monthly</strong></td><td>Retrospective</td><td>30 min</td><td>What went well, what could improve, action items</td></tr>
+</tbody></table>
+
+<h3 id='28-6-responsibility-matrix'>28.6 Responsibility Matrix</h3>
+
+<table><thead><tr><th>Module</th><th>Primary</th><th>Secondary (Backup)</th></tr></thead><tbody>
+<tr><td><code>orchestrator.py</code> / <code>models.py</code></td><td>You (Lead)</td><td>Student 1</td></tr>
+<tr><td><code>agent_base.py</code> / <code>agent_schemas.py</code></td><td>Student 1</td><td>You (Lead)</td></tr>
+<tr><td><code>llm_client.py</code></td><td>MS Eng 1</td><td>Student 1</td></tr>
+<tr><td><code>compliance_rules.py</code> / RAG</td><td>Student 2</td><td>MS Eng 2</td></tr>
+<tr><td><code>azure_prices_api.py</code> / pricing</td><td>MS Eng 2</td><td>Student 2</td></tr>
+<tr><td><code>dashboard.py</code> (UI)</td><td>Student 1</td><td>You (Lead)</td></tr>
+<tr><td><code>observability.py</code> / monitoring</td><td>MS Eng 1</td><td>Student 2</td></tr>
+<tr><td><code>health.py</code> / deployment</td><td>MS Eng 1</td><td>MS Eng 2</td></tr>
+<tr><td>Tests</td><td>Whoever writes the code</td><td>Student 2 (coverage guardian)</td></tr>
+<tr><td>Documentation</td><td>Student 2</td><td>Everyone (for their modules)</td></tr>
+</tbody></table>
+
+<h3 id='28-7-communication-channels'>28.7 Communication Channels</h3>
+
+<table><thead><tr><th>Channel</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><strong>GitHub Issues</strong></td><td>Bug reports, feature requests, technical discussions (public record)</td></tr>
+<tr><td><strong>GitHub Discussions</strong></td><td>Architecture decisions, RFCs, longer-form technical conversations</td></tr>
+<tr><td><strong>Pull Request Reviews</strong></td><td>Code-specific feedback, inline suggestions</td></tr>
+<tr><td><strong>Teams / Slack</strong></td><td>Quick questions, daily standups, meeting coordination</td></tr>
+<tr><td><strong>Shared Notebook (OneNote/Notion)</strong></td><td>Meeting notes, design docs, decision logs</td></tr>
+</tbody></table>
+
+
+<h2 id='conclusion'>Conclusion</h2>
+
+<p>This Master Guide covers every component of CloudOptima in depth — from data models and algorithms to design decisions and alternatives considered. The system represents a production-grade multi-agent architecture that demonstrates:</p>
+
+<ol>
+<li><strong>Adversarial arbitration</strong> as a better paradigm than consensus for multi-agent cloud design</li>
+<li><strong>Pydantic-validated structured outputs</strong> for reliable LLM integration</li>
+<li><strong>Multi-provider LLM abstraction</strong> enabling flexible model switching</li>
+<li><strong>RAG-enhanced compliance checking</strong> with curated regulatory knowledge</li>
+<li><strong>Disk-persisted caching</strong> for performance without cold starts</li>
+<li><strong>Full observability</strong> with tracing, audit logging, and error tracking</li>
+<li><strong>Graceful degradation</strong> at every level — no single point of failure</li>
+<li><strong>Azure-native deployment</strong> path with Container Apps and cost optimization</li>
+</ol>
+
+
+<p>CloudOptima was designed not just as a demo tool, but as a reference architecture for multi-agent AI systems — showing how to combine LLMs, structured validation, domain expertise, and adversarial reasoning into a reliable, production-ready application.</p>
+
+<hr class="section-divider">
+
+<p><em>"The best architecture comes from rigorous debate, not polite agreement."</em></p>
+<p>— CloudOptima Engineering Team, July 2026</p>
+
+<!-- Page number script -->
+<script>
+(function() {
+    'use strict';
+
+    const A4_PAGE_HEIGHT = 1123;  // px at 96 DPI for A4
+    const PAGE_HEIGHT = A4_PAGE_HEIGHT - 144; // minus margins
+
+    const indicator = document.getElementById('page-indicator');
+    const pageCurrent = document.getElementById('page-current');
+    const pageTotal = document.getElementById('page-total');
+    const pageSection = document.getElementById('page-section');
+
+    let scrollTimeout;
+    let lastPage = 0;
+    let lastSection = '';
+
+    // Collect all h2 headings for section tracking
+    const sections = [];
+    const headings = document.querySelectorAll('h2');
+    headings.forEach(function(h) {
+        sections.push({
+            element: h,
+            offset: h.offsetTop,
+            label: h.textContent.replace(/^\d+\.\s*/, '').trim()
+        });
+    });
+
+    // Calculate total estimated pages
+    function calcTotalPages() {
+        var docHeight = Math.max(
+            document.body.scrollHeight,
+            document.documentElement.scrollHeight
+        );
+        return Math.max(1, Math.ceil(docHeight / PAGE_HEIGHT));
+    }
+
+    function updatePageNumber() {
+        var scrollY = window.scrollY || window.pageYOffset;
+        var currentPage = Math.max(1, Math.floor(scrollY / PAGE_HEIGHT) + 1);
+        var totalPages = calcTotalPages();
+
+        if (currentPage !== lastPage) {
+            pageCurrent.textContent = currentPage;
+            lastPage = currentPage;
+        }
+
+        // Update total pages only if changed
+        var tp = totalPages;
+        if (pageTotal.textContent !== String(tp)) {
+            pageTotal.textContent = tp;
+        }
+
+        // Find current section
+        var currentSection = '';
+        for (var i = sections.length - 1; i >= 0; i--) {
+            if (scrollY + 100 >= sections[i].offset) {
+                currentSection = sections[i].label;
+                break;
+            }
+        }
+
+        if (currentSection && currentSection !== lastSection) {
+            pageSection.textContent = currentSection.length > 45
+                ? currentSection.substring(0, 42) + '...'
+                : currentSection;
+            lastSection = currentSection;
+        } else if (!currentSection && lastSection !== '') {
+            pageSection.textContent = 'Cover';
+            lastSection = '';
+        }
+
+        // Show/hide indicator with delay on idle
+        indicator.classList.add('visible');
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(function() {
+            indicator.classList.remove('visible');
+        }, 2000);
+    }
+
+    // Update on scroll with throttling via requestAnimationFrame
+    var ticking = false;
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            window.requestAnimationFrame(function() {
+                updatePageNumber();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+
+    // Update on resize
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(updatePageNumber, 200);
+    });
+
+    // Initial update
+    updatePageNumber();
+
+    // Show briefly on load, then fade
+    setTimeout(function() {
+        indicator.classList.add('visible');
+        setTimeout(function() {
+            indicator.classList.remove('visible');
+        }, 2500);
+    }, 500);
+
+    // Keyboard shortcut: press 'P' to toggle indicator
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'p' || e.key === 'P') {
+            if (!e.ctrlKey && !e.metaKey) {
+                indicator.classList.toggle('visible');
+                updatePageNumber();
+            }
+        }
+    });
+
+    // Log page count to console
+    console.log('CloudOptima Master Guide: ~' + calcTotalPages() + ' pages');
+})();
+</script>
+
+</body>
+</html>
