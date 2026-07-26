@@ -44,8 +44,6 @@ ARCHITECTURE.md
 docs/*.md
 docs/decisions/
 scripts/
-# Exception: allow the Master Guide (for Microsoft collaboration)
-!docs/CLOUDOPTIMA_MASTER_GUIDE.html
 src/api/
 src/cli/
 src/core/compliance_rag.py
