@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloudOptima — Master Guide: A Sequential Walkthrough</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: {
+            primaryColor: '#6C5CE7', primaryTextColor: '#fff', primaryBorderColor: '#6C5CE7',
+            lineColor: '#a29bfe', secondaryColor: '#2d2d5e', tertiaryColor: '#1a1a2e',
+            background: '#0d0d1a', mainBkg: '#1a1a2e', nodeBorder: '#6C5CE7',
+            clusterBkg: '#111122', clusterBorder: '#2d2d5e', titleColor: '#e0e0f0',
+            edgeLabelBackground: '#1a1a2e', nodeTextColor: '#e0e0f0'
+        }
+    });
+});
+</script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #0d0d1a; color: #e0e0f0; line-height: 1.7;
+        max-width: 1100px; margin: 0 auto; padding: 40px 60px;
+    }
+    .cover-page { text-align: center; padding: 80px 0 60px; border-bottom: 2px solid rgba(108,92,231,0.3); margin-bottom: 3rem; }
+    .cover-page h1 { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, #6C5CE7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 0.5rem 0; }
+    .cover-page .subtitle { font-size: 1.2rem; color: #a29bfe; margin: 1rem 0; }
+    .cover-page .meta { color: #888; font-size: 0.9rem; margin-top: 2rem; }
+    .cover-badge { display: inline-block; background: linear-gradient(135deg, rgba(108,92,231,0.2), rgba(162,155,254,0.1)); border: 1px solid rgba(108,92,231,0.3); border-radius: 12px; padding: 0.8rem 2rem; margin: 0.5rem; font-size: 0.85rem; color: #a29bfe; }
+    .nav-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.2); border-radius: 12px; padding: 0.8rem 1.5rem; margin: 1.5rem 0; font-size: 0.85rem; }
+    .nav-bar .step { color: #a29bfe; font-weight: 600; }
+    .nav-bar .step-desc { color: #888; }
+    .nav-bar .arrow { color: #555; margin: 0 0.5rem; }
+    h2 { font-size: 1.7rem; font-weight: 700; color: #a29bfe; margin: 2.5rem 0 1rem; padding-bottom: 0.3rem; border-bottom: 1px solid rgba(162,155,254,0.2); }
+    h3 { font-size: 1.25rem; font-weight: 600; color: #c0b8ff; margin: 1.8rem 0 0.6rem; }
+    h4 { font-size: 1.05rem; font-weight: 600; color: #ddd; margin: 1.2rem 0 0.4rem; }
+    p { margin: 0.6rem 0; color: #ccc; }
+    .step-header { background: rgba(108,92,231,0.08); border-left: 4px solid #6C5CE7; padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+    .step-header .step-num { color: #a29bfe; font-weight: 700; font-size: 0.85rem; }
+    .step-header .step-title { font-size: 1.1rem; font-weight: 600; color: #e0e0f0; margin-top: 0.2rem; }
+    blockquote { background: rgba(108,92,231,0.1); border-left: 4px solid #6C5CE7; padding: 0.8rem 1.2rem; margin: 1rem 0; border-radius: 0 8px 8px 0; font-style: italic; color: #bbb; }
+    blockquote strong { color: #a29bfe; }
+    .qa-box { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px; padding: 1.2rem 1.5rem; margin: 1.2rem 0; }
+    .qa-box .question { font-weight: 700; color: #10B981; font-size: 1rem; margin-bottom: 0.4rem; }
+    .qa-box .answer { color: #ccc; }
+    .lesson-box { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 1.2rem 1.5rem; margin: 1.2rem 0; }
+    .lesson-box .lesson-title { font-weight: 700; color: #EF4444; font-size: 1rem; margin-bottom: 0.4rem; }
+    .lesson-box .lesson-detail { color: #ccc; }
+    .tip-box { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25); border-radius: 10px; padding: 1.2rem 1.5rem; margin: 1.2rem 0; }
+    .tip-box .tip-title { font-weight: 700; color: #F59E0B; font-size: 1rem; margin-bottom: 0.4rem; }
+    .code-block { background: #111122; border: 1px solid #2d2d5e; border-radius: 8px; padding: 1rem; margin: 0.8rem 0; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.5; color: #a0d0ff; }
+    code.inline-code { background: rgba(108,92,231,0.15); padding: 0.15rem 0.4rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.85em; color: #a29bfe; }
+    .section-divider { border: none; height: 1px; background: linear-gradient(90deg, transparent, rgba(108,92,231,0.3), transparent); margin: 2.5rem 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+    th { background: rgba(108,92,231,0.15); color: #a29bfe; font-weight: 600; padding: 0.5rem 0.8rem; text-align: left; border: 1px solid #2d2d5e; }
+    td { padding: 0.4rem 0.8rem; border: 1px solid #2d2d5e; color: #ccc; }
+    tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    ul, ol { margin: 0.5rem 0 0.5rem 1.5rem; }
+    li { margin: 0.25rem 0; color: #ccc; }
+    .toc { margin: 2rem 0; }
+    .toc ol { counter-reset: toc-counter; list-style: none; margin-left: 0; }
+    .toc ol li { counter-increment: toc-counter; margin: 0.8rem 0; }
+    .toc ol li::before { content: counter(toc-counter) ". "; color: #a29bfe; font-weight: 700; }
+    .toc ol li a { color: #a29bfe; text-decoration: none; }
+    .toc ol li a:hover { color: #ddd; text-decoration: underline; }
+    .toc ol li ol { list-style: none; margin-left: 1.5rem; counter-reset: sub-counter; }
+    .toc ol li ol li { counter-increment: none; margin: 0.3rem 0; font-size: 0.85rem; }
+    .toc ol li ol li::before { content: ""; }
+    .toc ol li ol li a { color: #888; }
+    @page { size: A4; margin: 0.75in; @bottom-center { content: "Page " counter(page); font-family: 'Inter', sans-serif; font-size: 8pt; color: #999; } }
+    @page :first { @bottom-center { content: none; } }
+    @media print { body { background: white; color: #333; padding: 0; font-size: 10pt; } h1, h2, h3 { -webkit-text-fill-color: initial; background: none; color: #6C5CE7; } p, li, td { color: #444; } .code-block { background: #f5f5ff; border-color: #ddd; color: #333; } table th { background: #eee; color: #333; } a { color: #6C5CE7; } .page-indicator { display: none !important; } }
+    .page-indicator { position: fixed; bottom: 20px; right: 20px; background: rgba(108,92,231,0.85); backdrop-filter: blur(12px); color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; font-weight: 500; z-index: 9999; box-shadow: 0 4px 20px rgba(0,0,0,0.4); opacity: 0; transition: opacity 0.3s ease; pointer-events: none; user-select: none; }
+    .page-indicator.visible { opacity: 1; }
+    .page-indicator .page-sep { color: rgba(255,255,255,0.4); margin: 0 4px; }
+    .page-indicator .page-total { color: rgba(255,255,255,0.6); }
+    .page-indicator .page-section { display: block; font-size: 0.65rem; color: rgba(255,255,255,0.7); text-align: center; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div id="page-indicator" class="page-indicator">
+    <span id="page-current">1</span><span class="page-sep">/</span><span id="page-total" class="page-total">...</span>
+    <span id="page-section" class="page-section">Loading...</span>
+</div>
+
+<div class="cover-page">
+    <h1>CloudOptima</h1>
+    <div class="subtitle">Master Guide — A Sequential Walkthrough</div>
+    <p style="color: #a29bfe; font-size: 1.1rem; margin: 0.5rem 0;">
+        Start Here → What We Built → What We Learned → What's Next → How to Share
+    </p>
+    <div style="margin: 1.5rem 0;">
+        <span class="cover-badge">Sequential Walkthrough</span>
+        <span class="cover-badge">Microsoft Collaboration</span>
+        <span class="cover-badge">Team Onboarding</span>
+    </div>
+    <div class="meta">
+        <p><strong>Version:</strong> 3.0 — The Walkthrough Edition</p>
+        <p><strong>Author:</strong> G. Narendra &amp; CloudOptima Collaboration Team</p>
+        <p><strong>How to use this guide:</strong> Follow the sections in order. Each builds on the previous one. By the end, you'll know everything about the project, what we learned, and where we're going.</p>
+    </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- NAVIGATION STEPPER -->
+<div class="nav-bar">
+    <span><span class="step">Step 1</span><span class="arrow"> → </span><span class="step-desc">Start Here</span></span>
+    <span><span class="step">Step 2</span><span class="arrow"> → </span><span class="step-desc">What We Built</span></span>
+    <span><span class="step">Step 3</span><span class="arrow"> → </span><span class="step-desc">What We Learned</span></span>
+    <span><span class="step">Step 4</span><span class="arrow"> → </span><span class="step-desc">What's Next</span></span>
+    <span><span class="step">Step 5</span><span class="arrow"> → </span><span class="step-desc">How to Share</span></span>
+</div>
+
+<h2 id="toc">Table of Contents</h2>
+<div class="toc">
+<ol>
+<li><a href="#start-here">Step 1: Start Here — Get Up and Running (5 minutes)</a>
+<ol>
+<li><a href="#1-1-clone-and-setup">Clone and Setup</a></li>
+<li><a href="#1-2-run-the-app">Run the App</a></li>
+<li><a href="#1-3-run-the-tests">Run the Tests</a></li>
+<li><a href="#1-4-try-a-demo">Try a Demo Session</a></li>
+<li><a href="#1-5-what-just-happened">What Just Happened?</a></li>
+</ol>
+</li>
+<li><a href="#what-we-built">Step 2: What We Built — Understanding the System</a>
+<ol>
+<li><a href="#2-1-project-overview">Project at a Glance</a></li>
+<li><a href="#2-2-folder-structure">Folder Structure — What Goes Where</a></li>
+<li><a href="#2-3-how-it-works">How It Works: The 5-Agent Pipeline</a></li>
+<li><a href="#2-4-core-architecture">Core Architecture Components</a></li>
+<li><a href="#2-5-production-features">Production Features</a></li>
+</ol>
+</li>
+<li><a href="#what-we-learned">Step 3: What We Learned — Lessons from Building</a>
+<ol>
+<li><a href="#3-1-the-105-second-bug">The 105-Second Disaster</a></li>
+<li><a href="#3-2-five-mistakes">5 Critical Mistakes We Made</a></li>
+<li><a href="#3-3-hindsight">What We'd Do Differently</a></li>
+<li><a href="#3-4-azure-credits">How Microsoft Credits Changed Everything</a></li>
+</ol>
+</li>
+<li><a href="#whats-next">Step 4: What's Next — Roadmap and Future</a>
+<ol>
+<li><a href="#4-1-immediate-next-steps">Immediate Next Steps</a></li>
+<li><a href="#4-2-microsoft-integration">Microsoft Integration Points</a></li>
+<li><a href="#4-3-roadmap">16-Week Roadmap</a></li>
+</ol>
+</li>
+<li><a href="#how-to-share">Step 5: How to Share — Team and Collaboration</a>
+<ol>
+<li><a href="#5-1-team-onboarding">Onboarding New Team Members</a></li>
+<li><a href="#5-2-git-workflow">Our Git Workflow</a></li>
+<li><a href="#5-3-first-contribution">Making Your First Contribution</a></li>
+<li><a href="#5-4-presenting-to-microsoft">Presenting to Microsoft</a></li>
+</ol>
+</li>
+<li><a href="#qa">Q&A: Common Questions</a></li>
+<li><a href="#quick-ref">Quick Reference</a></li>
+</ol>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- STEP 1: START HERE -->
+<!-- ============================================================ -->
+<h2 id="start-here">Step 1: Start Here — Get Up and Running (5 minutes)</h2>
+
+<div class="step-header">
+    <div class="step-num">GOAL</div>
+    <div class="step-title">Clone the repo, install dependencies, run the app, see it working. Do this before anything else.</div>
+</div>
+
+<h3 id="1-1-clone-and-setup">1.1 Clone and Setup</h3>
+<p>Open your terminal and run these commands one by one:</p>
+<pre class="code-block"><code class="language-bash"># Download the project
+git clone https://github.com/G-Narendra/CloudOptima
+cd CloudOptima
+
+# Create a virtual environment (isolates our dependencies)
+python -m venv venv
+
+# Activate it
+source venv/bin/activate        # On Linux/Mac
+# venv\Scripts\activate         # On Windows
+
+# Install everything we need
+pip install -r requirements.txt
+
+# Copy the environment template (no API key needed for demo mode)
+cp .env.example .env
+</code></pre>
+
+<div class="tip-box">
+    <div class="tip-title">Why a virtual environment?</div>
+    <div class="lesson-detail">Without it, installing packages pollutes your global Python installation. Different projects might need different versions of the same library. A venv keeps each project isolated. If something breaks, just delete the venv folder and recreate it.</div>
+</div>
+
+<h3 id="1-2-run-the-app">1.2 Run the App</h3>
+<pre class="code-block"><code class="language-bash">streamlit run dashboard.py
+</code></pre>
+<p>This starts the web app. Open <strong>http://localhost:8501</strong> in your browser. You should see the CloudOptima dashboard.</p>
+
+<p><strong>What you'll see:</strong> A form asking for:</p>
+<ul>
+<li><strong>Project name</strong> — e.g., "Patient portal for UAE hospitals"</li>
+<li><strong>Workload type</strong> — e.g., "Real-time data processing"</li>
+<li><strong>Azure region</strong> — pick from dropdown (UAE North, Central India, etc.)</li>
+<li><strong>Compliance</strong> — pick from dropdown (UAE PDPL, India DPDP, etc.)</li>
+<li><strong>Scale</strong> — Small, Medium, Large</li>
+<li><strong>Monthly budget</strong> — enter a number</li>
+<li><strong>Services and context</strong> — optional details</li>
+</ul>
+
+<h3 id="1-3-run-the-tests">1.3 Run the Tests</h3>
+<p>Before you change any code, run the tests to make sure everything works:</p>
+<pre class="code-block"><code class="language-bash">pytest tests/ -v
+</code></pre>
+<p>You should see <strong>205+ tests pass</strong>. If they don't, check that your environment is set up correctly.</p>
+
+<div class="qa-box">
+    <div class="question">Q: Why 205+ tests? Isn't that overkill for a student project?</div>
+    <div class="answer">No — and here's why. Early versions had zero tests. Every change risked breaking something. When we added the Pydantic validation pipeline, we broke the session creation flow without realizing it for 3 days. Now each test file covers a critical path: models, orchestration, compliance rules, pricing data, LLM cache, health checks, error tracking, and observability. When all 205 pass, we know the core system works.</div>
+</div>
+
+<h3 id="1-4-try-a-demo">1.4 Try a Demo Session</h3>
+<p>Now let's see the app in action. Fill in the form with this test case:</p>
+<pre class="code-block"><code class="language-text">Project: HIPAA-compliant patient portal for UAE hospitals
+Workload: Real-time patient data processing
+Region: UAE North
+Compliance: UAE PDPL
+Scale: Medium (1K-50K users)
+Budget: 5000
+Services: AKS, Azure SQL, Cosmos DB
+Context: Need multi-region DR, 3-month migration deadline
+</code></pre>
+<p>Click <strong>"Generate Architecture"</strong>. Within 1 second, you'll see:</p>
+<ul>
+<li><strong>4 agent analyses</strong> (Architect, Cost, Security, Compliance)</li>
+<li><strong>A Judge's verdict</strong> resolving conflicts between agents</li>
+<li><strong>5 downloadable artifacts</strong> (Bicep, Terraform, Cost Forecast, Compliance Report, Arbitration Rationale)</li>
+</ul>
+
+<h3 id="1-5-what-just-happened">1.5 What Just Happened?</h3>
+<p>Behind the scenes, this pipeline executed:</p>
+<pre class="code-block"><code class="language-text">User submits form
+    --> Input sanitized (XSS protection)
+    --> Session created with unique ID
+    --> Architect agent generates design (compute, storage, network, data)
+    --> Cost analyst evaluates pricing (identifies conflicts with Architect)
+    --> Security engineer assesses vulnerabilities (identifies conflicts)
+    --> Compliance officer checks regulations (identifies conflicts)
+    --> Orchestrator detects conflicts across 6 agent pairs
+    --> Judge resolves each conflict (binary decisions)
+    --> 5 artifacts generated (IaC, cost, compliance, rationale)
+    --> Results displayed in dashboard with KPI cards
+</code></pre>
+
+<p>Everything completed in <strong>&lt;1 second</strong> because we're in demo mode — no real API calls are made. The mock responses are realistic enough to demonstrate the full workflow.</p>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- STEP 2: WHAT WE BUILT -->
+<!-- ============================================================ -->
+<h2 id="what-we-built">Step 2: What We Built — Understanding the System</h2>
+
+<div class="step-header">
+    <div class="step-num">GOAL</div>
+    <div class="step-title">Understand every part of the system so you can explain it, debug it, and extend it.</div>
+</div>
+
+<h3 id="2-1-project-overview">2.1 Project at a Glance</h3>
+<p><strong>CloudOptima</strong> is a multi-agent AI system that simulates a panel of five cloud experts to automatically design, cost-optimize, security-audit, and compliance-check Azure architectures. You describe your needs in plain English, and within seconds you get a complete, arbitrated architecture with downloadable IaC templates.</p>
+
+<table>
+<thead><tr><th>Dimension</th><th>What It Is</th></tr></thead>
+<tbody>
+<tr><td><strong>What it does</strong></td><td>Generates production-grade Azure architectures from plain-English descriptions</td></tr>
+<tr><td><strong>How it works</strong></td><td>5 AI agents (Architect, Cost, Security, Compliance, Judge) debate and resolve architecture conflicts</td></tr>
+<tr><td><strong>Tech stack</strong></td><td>Python, Streamlit, Pydantic v2, NVIDIA NIMs API (or mock data)</td></tr>
+<tr><td><strong>Outputs</strong></td><td>Bicep templates, Terraform configs, cost forecasts, compliance reports, arbitration rationale</td></tr>
+<tr><td><strong>Current hosting</strong></td><td>Streamlit Community Cloud (free tier)</td></tr>
+<tr><td><strong>Azure credits</strong></td><td>$100 student credits + free tier services (App Service, Blob, DevOps)</td></tr>
+</tbody>
+</table>
+
+<h3 id="2-2-folder-structure">2.2 Folder Structure — What Goes Where</h3>
+<pre class="code-block"><code class="language-text">CloudOptima/
++-- dashboard.py             # THE ENTRY POINT. Run this to start the app.
++-- requirements.txt          # All Python dependencies (pinned versions)
++-- pyproject.toml            # Project metadata
++-- Dockerfile                # For container deployment
++-- docker-compose.yml        # Local multi-service orchestration
++-- .env.example              # Template for environment variables
++-- pytest.ini                # Test configuration
+
++-- src/                      # ALL SOURCE CODE
+    +-- config.py             # Environment variables (API keys, modes)
+    +-- core/                 # The engine room (16 files)
+        models.py             # All data structures (Session, AgentTurn, Conflict...)
+        agent_base.py         # Agent framework + system prompts
+        agent_schemas.py      # Pydantic validation schemas
+        orchestrator.py       # The main workflow engine
+        nvidia_client.py      # Mock/demo client (instant responses)
+        llm_client.py         # Multi-provider LLM abstraction
+        llm_cache.py          # SHA256-hashed response cache
+        azure_prices_api.py   # Live Azure Retail Prices API
+        azure_pricing.py      # Static pricing database (4 regions)
+        compliance_rules.py   # Structured compliance rules (21 rules)
+        compliance_rag.py     # RAG-powered compliance via ChromaDB
+        health.py             # Health check system
+        sanitize.py           # Input protection (XSS prevention)
+        sentry.py             # Error tracking
+        observability.py      # Tracing, audit logging, metrics
+    +-- api/main.py           # FastAPI REST API
+    +-- cli/main.py           # Command-line interface
+
++-- tests/                    # 205+ tests (11 test files)
++-- deploy/                   # Azure deployment scripts
+</code></pre>
+
+<div class="qa-box">
+    <div class="question">Q: Where should I start reading the code?</div>
+    <div class="answer">Read in this order: (1) <code class="inline-code">src/core/models.py</code> — all data structures (20 min), (2) <code class="inline-code">src/core/agent_base.py</code> — how agents work (30 min), (3) <code class="inline-code">src/core/orchestrator.py</code> — the main workflow (45 min), (4) <code class="inline-code">dashboard.py</code> — the UI (30 min). That's the critical path.</div>
+</div>
+
+<h3 id="2-3-how-it-works">2.3 How It Works: The 5-Agent Pipeline</h3>
+<p>This is the most important thing to understand. The system runs 5 AI agents in a specific sequence:</p>
+
+<div class="mermaid" style="background:#111122;border-radius:12px;padding:1.5rem;margin:1.2rem 0;text-align:center;border:1px solid #2d2d5e;">
+flowchart TB
+    subgraph Input["User Input"]
+        A["Fill Form<br/>Project, Region,<br/>Compliance, Budget"]
+    end
+    subgraph Pipeline["5-Agent Pipeline"]
+        direction TB
+        S["Sanitize Input<br/>XSS + injection protection"]
+        SE["Create Session<br/>UUID + PENDING status"]
+        AR["Architect<br/>Designs compute, storage,<br/>network, data tiers"]
+        CO["Cost Analyst<br/>Estimates pricing,<br/>flags conflicts"]
+        SE2["Security Engineer<br/>Assesses vulnerabilities,<br/>flags conflicts"]
+        CP["Compliance Officer<br/>Checks regulations,<br/>flags conflicts"]
+        CD["Conflict Detector<br/>6 agent pairs checked"]
+        JG["Judge<br/>Binary arbitration per conflict"]
+        AG["Artifact Generator<br/>IaC + Cost + Compliance + Rationale"]
+    end
+    subgraph Output["Dashboard"]
+        O1["KPI Cards: Time, Conflicts, Artifacts"]
+        O2["4 Agent Analyses with expand/collapse"]
+        O3["Judge's Verdict with rationale"]
+        O4["5 Downloadable Artifacts"]
+    end
+    A --> S --> SE --> AR --> CO --> SE2 --> CP --> CD --> JG --> AG --> O1 & O2 & O3 & O4
+    style AR fill:#6C5CE7,color:#fff
+    style CO fill:#F59E0B,color:#fff
+    style SE2 fill:#EF4444,color:#fff
+    style CP fill:#3B82F6,color:#fff
+    style JG fill:#10B981,color:#fff
+</div>
+
+<p><strong>The text version (for quick reference):</strong></p>
+<pre class="code-block"><code class="language-text">Step 1: You fill in the form
+Step 2: Input is sanitized (no XSS, no injections)
+Step 3: A Session is created with a unique UUID
+Step 4: Agents run one by one:
+   a. ARCHITECT: Designs compute, storage, network, and data tiers
+   b. COST ANALYST: Estimates pricing, finds savings, flags conflicts
+   c. SECURITY ENGINEER: Assesses vulnerabilities, flags conflicts
+   d. COMPLIANCE OFFICER: Checks regulations, flags conflicts
+Step 5: Orchestrator detects conflicts (6 possible pair combinations)
+Step 6: JUDGE resolves each conflict with a binary decision
+Step 7: 5 artifacts are generated (IaC, cost forecast, etc.)
+Step 8: Results appear in the dashboard
+</code></pre>
+
+<div class="qa-box">
+    <div class="question">Q: Why run agents sequentially instead of in parallel?</div>
+    <div class="answer">Each agent after the Architect needs to see the Architect's design to evaluate it. The Cost Analyst can't find pricing conflicts without knowing what the Architect proposed. But within each agent, the LLM call could run in parallel with other non-dependent work. For the demo mode (no real API calls), sequential execution is instant anyway.</div>
+</div>
+
+<h3 id="2-4-core-architecture">2.4 Core Architecture Components</h3>
+
+<h4>The Adversarial Arbitration Engine (The Secret Sauce)</h4>
+<p>This is what makes CloudOptima different from every other AI architecture tool. Instead of averaging opinions (which produces vague, middle-ground recommendations), we use <strong>adversarial arbitration</strong>:</p>
+<ul>
+<li>Each agent <strong>advocates uncompromisingly</strong> for its domain</li>
+<li>Each non-Architect agent <strong>explicitly reports conflicts</strong> with the Architect's design</li>
+<li>The Orchestrator detects conflicts across <strong>6 agent pairs</strong></li>
+<li>The <strong>Judge</strong> makes a <strong>binary decision</strong> for each conflict: OVERRULE one agent, SUSTAIN the other, or PARTIAL OVERRIDE</li>
+</ul>
+
+<p><strong>Why binary? Because you can't average compliance:</strong> Data either stays in-region or it doesn't. Data is either encrypted at rest or it isn't. You either have 99.95% SLA or you don't. Compromise positions often violate requirements.</p>
+
+<h4>The Pydantic Validation Pipeline</h4>
+<p>LLM outputs produce malformed JSON about 20% of the time. Our pipeline handles this gracefully:</p>
+<pre class="code-block"><code class="language-python">def validate_agent_output(output_text, agent_type):
+    # 1. Extract JSON from code fences
+    # 2. Parse with json.loads()
+    # 3. Validate against Pydantic schema
+    # 4. If anything fails: log error, return partial data
+    #    NEVER CRASH. The session continues with what it has.
+</code></pre>
+<p><strong>Key principle:</strong> Never crash on validation failure. The dashboard shows partial results, and the Judge accounts for missing agent output.</p>
+
+<h4>The Two-Tier Compliance System</h4>
+<p><strong>Tier 1:</strong> 21 hardcoded compliance rules across 4 frameworks (India DPDP, EU GDPR, US HIPAA, UAE PDPL). These give zero-latency, guaranteed-accurate checks for the most common use cases.</p>
+<p><strong>Tier 2:</strong> ChromaDB vector store for unknown regions. Queried via sentence-transformers embeddings when the hardcoded rules don't cover a region.</p>
+
+<h4>The Two-Tier Pricing System</h4>
+<p><strong>Static DB:</strong> 4 regions x 100+ Azure SKUs with real pricing data. Instant lookups, zero network calls.</p>
+<p><strong>Live API:</strong> Calls <code class="inline-code">prices.azure.com</code> (public, no auth) for prices outside our database. Results are cached. Falls back to static DB on failure.</p>
+
+<h3 id="2-5-production-features">2.5 Production Features (Built-In)</h3>
+<table>
+<thead><tr><th>Feature</th><th>File</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><strong>Observability</strong></td><td><code class="inline-code">observability.py</code></td><td>Tracks 14 event types per session, writes audit logs (append-only JSONL), exposes metrics</td></tr>
+<tr><td><strong>Error Tracking</strong></td><td><code class="inline-code">sentry.py</code></td><td>Sentry integration with 25% sample rate, PII sanitizer (removes stack variables, redacts headers)</td></tr>
+<tr><td><strong>Health Checks</strong></td><td><code class="inline-code">health.py</code></td><td>Registry pattern: each component registers its health. Displayed in dashboard sidebar.</td></tr>
+<tr><td><strong>Input Sanitization</strong></td><td><code class="inline-code">sanitize.py</code></td><td>Strips null bytes, truncates length, detects XSS patterns (script, javascript:, onerror=)</td></tr>
+<tr><td><strong>LLM Cache</strong></td><td><code class="inline-code">llm_cache.py</code></td><td>SHA256-hashed, disk-persisted, TTL-aware, FIFO eviction (max 1000 entries)</td></tr>
+<tr><td><strong>Session Persistence</strong></td><td><code class="inline-code">orchestrator.py</code></td><td>In-memory dict for now (zero setup). Migration path: Azure Cosmos DB or Redis.</td></tr>
+</tbody>
+</table>
+
+<div class="tip-box">
+    <div class="tip-title">Why we built production features into a student project</div>
+    <div class="lesson-detail">Because the Microsoft team will ask: "How do you know it's working?" Without observability, we couldn't answer. Without health checks, we couldn't prove uptime. Without input sanitization, we'd be vulnerable. These aren't optional extras — they're what separates a demo from a product.</div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- STEP 3: WHAT WE LEARNED -->
+<!-- ============================================================ -->
+<h2 id="what-we-learned">Step 3: What We Learned — Lessons from Building</h2>
+
+<div class="step-header">
+    <div class="step-num">GOAL</div>
+    <div class="step-title">Learn from our mistakes so you don't repeat them. This is what we'd tell our past selves.</div>
+</div>
+
+<h3 id="3-1-the-105-second-bug">3.1 The 105-Second Disaster (Our Biggest Failure)</h3>
+<p><strong>Timeline:</strong> We deployed to Streamlit Cloud. First demo with friends: <strong>98 seconds</strong> for a response. Next session: <strong>105 seconds</strong>. </p>
+
+<p><strong>Root cause:</strong> 3 lines of code:</p>
+<pre class="code-block"><code class="language-python">class NVIDIAClient:
+    def chat_completion(self, messages):
+        if settings.demo_mode:          # <--- Was False on Streamlit Cloud
+            return self._mock_response(messages)
+        # ... try real API with 60s timeout ...  # <--- Always hit this
+</code></pre>
+<p>The <code class="inline-code">DEMO_MODE</code> environment variable was never set on Streamlit Cloud. Every request made a real API call. NVIDIA's API doesn't work well from Streamlit's restricted network — each call timed out after 60 seconds. Then tenacity retried 3 times (2s + 4s + 8s). For 5 agents, worst case was <strong>370 seconds</strong>.</p>
+
+<p><strong>The fix was 3 layers deep:</strong></p>
+<ul>
+<li><strong>Layer 1:</strong> Removed the API call path entirely. Made <code class="inline-code">chat_completion()</code> always return mock data.</li>
+<li><strong>Layer 2:</strong> If we re-enable it later, timeout drops from 60s to 5s, retries from 3 to 1.</li>
+<li><strong>Layer 3:</strong> Fixed Material icon rendering that was showing up as raw text.</li>
+</ul>
+
+<div class="lesson-box">
+    <div class="lesson-title">THE META-LESSON: Deploy early, deploy often</div>
+    <div class="lesson-detail">We tested locally with a working API key (everything was fast). Deployed to Streamlit Cloud (API was blocked). Never noticed because demo mode defaulted to <code class="inline-code">false</code>. The bug would have been caught in 5 minutes if we'd deployed on day 1. <strong>Always test on your target platform.</strong></div>
+</div>
+
+<h3 id="3-2-five-mistakes">3.2 Five Critical Mistakes We Made</h3>
+
+<div class="lesson-box">
+    <div class="lesson-title">Mistake 1: Time-based session IDs</div>
+    <div class="lesson-detail">We used <code class="inline-code">session_20240725_143022</code> format. Two sessions created in the same second had the same ID. Data corruption. <strong>Fix:</strong> <code class="inline-code">uuid.uuid4().hex[:12]</code> — 16^12 unique values. <strong>Lesson:</strong> Never use time-based IDs for concurrent systems.</div>
+</div>
+
+<div class="lesson-box">
+    <div class="lesson-title">Mistake 2: Naive datetimes</div>
+    <div class="lesson-detail">We used <code class="inline-code">datetime.utcnow()</code> — returns a naive datetime (no timezone). Comparing naive vs aware datetimes raises TypeError. Sorting sessions broke. JSON serialization failed. <strong>Fix:</strong> <code class="inline-code">datetime.now(timezone.utc)</code>. <strong>Lesson:</strong> Always use timezone-aware datetimes. No excuse in 2026.</div>
+</div>
+
+<div class="lesson-box">
+    <div class="lesson-title">Mistake 3: 60-second HTTP timeouts</div>
+    <div class="lesson-detail">Default timeout for httpx is 60 seconds. On Streamlit Cloud's restricted network, every API call waited a full minute before failing. <strong>Fix:</strong> Set timeouts aggressively (3-5s) for serverless apps. Fail fast to mock data.</div>
+</div>
+
+<div class="lesson-box">
+    <div class="lesson-title">Mistake 4: No gitignore for .env</div>
+    <div class="lesson-detail">Committed <code class="inline-code">.env</code> with real NVIDIA API keys to a public GitHub repo. A bot scraped them within 30 minutes. NVIDIA revoked the key. <strong>Fix:</strong> Set up .gitignore before the first commit. Use <code class="inline-code">.env.example</code> as a template.</div>
+</div>
+
+<div class="lesson-box">
+    <div class="lesson-title">Mistake 5: Regex-based JSON extraction</div>
+    <div class="lesson-detail">Used <code class="inline-code">re.search(r'\{.*\}', text)</code> to extract JSON from LLM outputs. Broke when string values contained braces. <strong>Fix:</strong> Multi-stage extraction: try <code class="inline-code">```json</code> fence first, then bare <code class="inline-code">```</code> fence, then regex as last resort.</div>
+</div>
+
+<h3 id="3-3-hindsight">3.3 What We'd Do Differently</h3>
+<table>
+<thead><tr><th>If We Started Over</th><th>Instead Of...</th><th>We'd Do This</th></tr></thead>
+<tbody>
+<tr><td><strong>Deployment</strong></td><td>Streamlit Cloud first</td><td>Azure App Service from day 1 (more professional, same effort)</td></tr>
+<tr><td><strong>Storage</strong></td><td>In-memory dicts</td><td>Azure Cosmos DB or Redis (sessions survive restarts)</td></tr>
+<tr><td><strong>Monitoring</strong></td><td>Basic JSON logging</td><td>Azure Monitor + Application Insights (real-time dashboards)</td></tr>
+<tr><td><strong>Auth</strong></td><td>No authentication</td><td>Azure AD B2C (user accounts, rate limiting)</td></tr>
+<tr><td><strong>CI/CD</strong></td><td>Manual git push</td><td>Azure DevOps pipelines (auto-test, auto-deploy)</td></tr>
+<tr><td><strong>LLM Provider</strong></td><td>NVIDIA NIMs (free)</td><td>Azure OpenAI (GPT-4o, better quality, available via MS team)</td></tr>
+</tbody>
+</table>
+
+<h3 id="3-4-azure-credits">3.4 How Microsoft Credits Changed Everything</h3>
+<p>We built CloudOptima with $0 budget — free Streamlit Cloud, free NVIDIA API credits. When Microsoft granted us a <strong>student account with $100 Azure credits</strong>, the possibilities expanded dramatically:</p>
+
+<table>
+<thead><tr><th>Before ($0 budget)</th><th>After ($100 + free tier)</th></tr></thead>
+<tbody>
+<tr><td>Deployed on Streamlit Cloud (limited)</td><td>Can deploy on Azure App Service F1 (free, 10 apps)</td></tr>
+<tr><td>No Azure services to demo</td><td>Can provision real AKS, Cosmos DB, Azure SQL</td></tr>
+<tr><td>Pricing from static database only</td><td>Live Azure Retail Prices API + real validation</td></tr>
+<tr><td>No persistent storage</td><td>Azure Blob Storage (5 GB free)</td></tr>
+<tr><td>Manual health checks</td><td>Azure Monitor + Application Insights</td></tr>
+</tbody>
+</table>
+
+<div class="tip-box">
+    <div class="tip-title">Free Azure services you might not know about</div>
+    <div class="lesson-detail">Azure student account includes: App Service (10 web apps), Blob Storage (5 GB), Virtual Machines (750 hrs/month B1s), DevOps (5 users free). These don't consume your $100 credits. We didn't know when we started. Claim your student account first — it changes everything.</div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- STEP 4: WHAT'S NEXT -->
+<!-- ============================================================ -->
+<h2 id="whats-next">Step 4: What's Next — Roadmap and Future</h2>
+
+<div class="step-header">
+    <div class="step-num">GOAL</div>
+    <div class="step-title">Know exactly what we're doing next, what Microsoft can help with, and where this project is going.</div>
+</div>
+
+<h3 id="4-1-immediate-next-steps">4.1 Immediate Next Steps (This Week)</h3>
+<ol>
+<li><strong>Deploy on Azure App Service</strong> — move from Streamlit Cloud to Azure</li>
+<li><strong>Set up Azure DevOps CI/CD</strong> — automated testing and deployment pipeline</li>
+<li><strong>Integrate Azure Monitor</strong> — replace basic JSON logging with real dashboards</li>
+<li><strong>Claim Azure OpenAI access</strong> — upgrade from NVIDIA NIMs to GPT-4o</li>
+</ol>
+
+<h3 id="4-2-microsoft-integration">4.2 Microsoft Integration Points</h3>
+<p>Here's exactly where the Microsoft engineers can add the most value, in priority order:</p>
+
+<table>
+<thead><tr><th>Priority</th><th>Area</th><th>Current State</th><th>Microsoft Can Help With</th></tr></thead>
+<tbody>
+<tr><td><strong>High</strong></td><td>Azure OpenAI</td><td>NVIDIA NIMs (free tier)</td><td>Provision Azure OpenAI endpoint, GPT-4o access</td></tr>
+<tr><td><strong>High</strong></td><td>CI/CD Pipeline</td><td>Manual git push</td><td>Set up Azure DevOps + GitHub Actions</td></tr>
+<tr><td><strong>Medium</strong></td><td>Authentication</td><td>No auth (public demo)</td><td>Azure AD B2C / Entra ID integration</td></tr>
+<tr><td><strong>Medium</strong></td><td>Monitoring</td><td>Basic JSON logging</td><td>Azure Monitor + Application Insights setup</td></tr>
+<tr><td><strong>Medium</strong></td><td>Security Review</td><td>Basic sanitization</td><td>Microsoft Defender for Cloud audit</td></tr>
+<tr><td><strong>Future</strong></td><td>Scalability</td><td>In-memory, single instance</td><td>Azure Redis Cache, Cosmos DB design</td></tr>
+</tbody>
+</table>
+
+<h3 id="4-3-roadmap">4.3 16-Week Roadmap</h3>
+<pre class="code-block"><code class="language-text">Phase 1: Stabilize (Weeks 1-4)
+  Week 1: Azure App Service deployment
+  Week 2: Azure DevOps CI/CD
+  Week 3: Azure Monitor + Application Insights
+  Week 4: Azure OpenAI integration (GPT-4o)
+
+Phase 2: Data Layer (Weeks 5-8)
+  Week 5: Cosmos DB for session persistence
+  Week 6: Azure Blob Storage for audit logs
+  Week 7: Redis Cache for LLM responses
+  Week 8: User accounts via Entra ID
+
+Phase 3: AI Improvements (Weeks 9-12)
+  Week 9: GPT-4o powered agents (better quality responses)
+  Week 10: Streaming agent responses (real-time)
+  Week 11: Multi-turn conversations
+  Week 12: 6th agent: Sustainability Officer
+
+Phase 4: Production (Weeks 13-16)
+  Week 13: Security audit via Defender for Cloud
+  Week 14: Load testing + auto-scaling
+  Week 15: Custom domain + SSL
+  Week 16: Public launch + documentation
+</code></pre>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- STEP 5: HOW TO SHARE -->
+<!-- ============================================================ -->
+<h2 id="how-to-share">Step 5: How to Share — Team and Collaboration</h2>
+
+<div class="step-header">
+    <div class="step-num">GOAL</div>
+    <div class="step-title">Onboard new team members, establish workflows, and present effectively to Microsoft.</div>
+</div>
+
+<h3 id="5-1-team-onboarding">5.1 Onboarding New Team Members</h3>
+<p><strong>Day 1: Environment Setup</strong></p>
+<pre class="code-block"><code class="language-bash">git clone https://github.com/G-Narendra/CloudOptima
+cd CloudOptima
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # Edit: set DEMO_MODE=true
+streamlit run dashboard.py   # Open http://localhost:8501
+pytest tests/ -v   # Verify 205+ tests pass
+</code></pre>
+
+<p><strong>Day 2: Read the Code (in this order)</strong></p>
+<ol>
+<li><code class="inline-code">src/core/models.py</code> — All data structures (20 min)</li>
+<li><code class="inline-code">src/core/agent_base.py</code> — BaseAgent + prompts (30 min)</li>
+<li><code class="inline-code">src/core/agent_schemas.py</code> — Validation schemas (15 min)</li>
+<li><code class="inline-code">src/core/orchestrator.py</code> — The main workflow (45 min)</li>
+<li><code class="inline-code">dashboard.py</code> — The UI (30 min)</li>
+</ol>
+
+<p><strong>Day 3: First Task</strong></p>
+<ul>
+<li>Pick an issue labeled <code class="inline-code">good-first-issue</code></li>
+<li>Branch: <code class="inline-code">git checkout -b fix/your-issue</code></li>
+<li>Make changes, run tests, commit, push</li>
+<li>Create a PR with: "What changed, why, how to test"</li>
+</ul>
+
+<h3 id="5-2-git-workflow">5.2 Our Git Workflow</h3>
+<pre class="code-block"><code class="language-text">main (production-ready — never commit directly!)
+  +-- feature/add-llm-cache    (one branch per feature)
+  +-- fix/timeout-bug          (one branch per bug fix)
+  +-- docs/update-readme       (documentation changes)
+</code></pre>
+<p><strong>Rules:</strong></p>
+<ul>
+<li>Never commit to <code class="inline-code">main</code> directly — always branch</li>
+<li>Branch names: <code class="inline-code">feature/xxx</code>, <code class="inline-code">fix/xxx</code>, <code class="inline-code">docs/xxx</code></li>
+<li>PR description must include: what changed, why, how to test</li>
+<li>All tests pass before merging</li>
+</ul>
+
+<h3 id="5-3-first-contribution">5.3 Making Your First Contribution</h3>
+<p>Want to add a 6th agent? It's designed to be easy:</p>
+<pre class="code-block"><code class="language-python"># Step 1: Add to AgentType enum (src/core/models.py)
+class AgentType(str, Enum):
+    SUSTAINABILITY = "sustainability"  # New!
+
+# Step 2: Write a system prompt (src/core/agent_base.py)
+SYSTEM_PROMPTS[AgentType.SUSTAINABILITY] = """
+You are an Azure Sustainability Officer...
+"""
+
+# Step 3: Create a Pydantic schema (src/core/agent_schemas.py)
+class SustainabilityResponse(BaseModel):
+    assessment: SustainabilityAssessment
+
+# Step 4: Register the schema
+AGENT_RESPONSE_SCHEMAS[AgentType.SUSTAINABILITY] = SustainabilityResponse
+
+# Step 5: Add to orchestrator (src/core/orchestrator.py)
+agents.append(BaseAgent(AgentType.SUSTAINABILITY))
+</code></pre>
+<p>That's about 50 lines of code. The BaseAgent, validation pipeline, and conflict detection all work automatically.</p>
+
+<h3 id="5-4-presenting-to-microsoft">5.4 Presenting to Microsoft</h3>
+<p>Here's the agenda I recommend for your meeting:</p>
+
+<table>
+<thead><tr><th>Time</th><th>Topic</th><th>What to Show</th></tr></thead>
+<tbody>
+<tr><td><strong>5 min</strong></td><td>The Problem</td><td>Why cloud architecture needs 4+ experts. The workflow gap.</td></tr>
+<tr><td><strong>5 min</strong></td><td>Live Demo</td><td>Open the app. Run a session. Show 5 agents + Judge verdict + artifacts.</td></tr>
+<tr><td><strong>5 min</strong></td><td>Architecture</td><td>Show the folder structure. Explain adversarial arbitration.</td></tr>
+<tr><td><strong>5 min</strong></td><td>Our Mistakes</td><td>The 105-second bug. The .env leak. Show we learn from failures.</td></tr>
+<tr><td><strong>5 min</strong></td><td>Ask Microsoft</td><td>Show the Integration Points table (section 4.2). Ask for specific help.</td></tr>
+<tr><td><strong>5 min</strong></td><td>Roadmap</td><td>Show the 16-week plan. Ask which phases they can help with.</td></tr>
+</tbody>
+</table>
+
+<p><strong>Key messages to convey:</strong></p>
+<ul>
+<li>"We built a working multi-agent system that generates production-grade architectures"</li>
+<li>"The adversarial arbitration pattern is novel — no other tool does this"</li>
+<li>"We're Azure-native — we built this for Azure"</li>
+<li>"We know what we don't know — here's where we need Microsoft's expertise"</li>
+<li>"We have $100 credits and want to use them to deploy on Azure properly"</li>
+</ul>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- QA SECTION -->
+<!-- ============================================================ -->
+<h2 id="qa">Q&amp;A: Common Questions</h2>
+
+<div class="qa-box">
+    <div class="question">Q: Why 5 agents? Why not 3 or 7?</div>
+    <div class="answer">The Azure Well-Architected Framework defines 5 pillars. Our agents map directly: Architect (Performance + Operational Excellence), Cost (Cost Optimization), Security (Security), Compliance (Reliability), Judge (Cross-pillar arbitration). With 4 specialists we have 6 conflict pairs — tractable. With 6 specialists we'd have 15 pairs — overwhelming.</div>
+</div>
+
+<div class="qa-box">
+    <div class="question">Q: Why Streamlit and not Next.js / React?</div>
+    <div class="answer">Speed of development. Our team knows Python, not frontend frameworks. We built a working dashboard in 2 days. Trade-off: harder to customize complex interactions. If needed, we'd migrate to Next.js + FastAPI — the FastAPI backend at <code class="inline-code">src/api/main.py</code> is already in place.</div>
+</div>
+
+<div class="qa-box">
+    <div class="question">Q: Is the compliance advice legally accurate?</div>
+    <div class="answer">No — and we explicitly say so. Every compliance assessment includes the disclaimer: "This output is decision support for a design exercise, not legal advice." The rules are simplified from public regulatory text. Real compliance requires a human expert.</div>
+</div>
+
+<div class="qa-box">
+    <div class="question">Q: Why in-memory storage instead of a database?</div>
+    <div class="answer">Zero setup, O(1) lookups, easy debugging. 100 concurrent sessions use less than 50 MB RAM. For production, we'd migrate to Azure Cosmos DB or Redis — the Pydantic models are already serializable, so migration is straightforward.</div>
+</div>
+
+<div class="qa-box">
+    <div class="question">Q: Can I add a 6th agent?</div>
+    <div class="answer">Yes, in about 50 lines of code. See section 5.3 for the exact steps. The BaseAgent, validation pipeline, and conflict detection all work automatically.</div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!-- QUICK REFERENCE -->
+<!-- ============================================================ -->
+<h2 id="quick-ref">Quick Reference</h2>
+
+<h3>Commands</h3>
+<pre class="code-block"><code class="language-bash">streamlit run dashboard.py    # Start the app
+pytest tests/ -v              # Run all tests
+pytest tests/test_models.py   # Run specific test file
+git checkout -b feature/xxx   # Create a new branch
+git commit -m "Message"       # Commit changes
+git push origin feature/xxx   # Push branch to GitHub
+</code></pre>
+
+<h3>Environment Variables</h3>
+<table>
+<thead><tr><th>Variable</th><th>Default</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code class="inline-code">DEMO_MODE</code></td><td><code class="inline-code">true</code></td><td>Use mock data (no API calls). Set to <code class="inline-code">false</code> for live LLM.</td></tr>
+<tr><td><code class="inline-code">NVIDIA_API_KEY</code></td><td>—</td><td>Required only if <code class="inline-code">DEMO_MODE=false</code></td></tr>
+<tr><td><code class="inline-code">NVIDIA_MODEL</code></td><td><code class="inline-code">meta/llama-3.1-70b-instruct</code></td><td>LLM model to use</td></tr>
+<tr><td><code class="inline-code">SENTRY_DSN</code></td><td>—</td><td>Sentry error tracking (optional)</td></tr>
+<tr><td><code class="inline-code">LOG_LEVEL</code></td><td><code class="inline-code">INFO</code></td><td>Logging level (<code class="inline-code">DEBUG</code> for verbose)</td></tr>
+</tbody>
+</table>
+
+<h3>Key Files</h3>
+<table>
+<thead><tr><th>File</th><th>Lines</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code class="inline-code">dashboard.py</code></td><td>~400</td><td>Streamlit UI — forms, progress bars, result tabs</td></tr>
+<tr><td><code class="inline-code">src/core/models.py</code></td><td>~200</td><td>All data models (Session, AgentTurn, Conflict, etc.)</td></tr>
+<tr><td><code class="inline-code">src/core/orchestrator.py</code></td><td>~350</td><td>Main workflow — session lifecycle, conflict detection, artifacts</td></tr>
+<tr><td><code class="inline-code">src/core/agent_base.py</code></td><td>~150</td><td>BaseAgent class + 5 system prompts</td></tr>
+<tr><td><code class="inline-code">src/core/agent_schemas.py</code></td><td>~200</td><td>Pydantic validation schemas + JSON extraction</td></tr>
+</tbody>
+</table>
+
+<hr class="section-divider">
+
+<p style="text-align: center; color: #666; font-style: italic; padding: 2rem;">
+    <strong style="color: #a29bfe;">CloudOptima</strong> — Start Here. Understand What We Built. Learn From Our Mistakes. Plan What's Next. Share the Work.<br>
+    <span style="font-size: 0.85rem;">Version 3.0 — The Walkthrough Edition | July 2026</span>
+</p>
+
+<script>
+(function() {
+    var indicator = document.getElementById('page-indicator');
+    var currentEl = document.getElementById('page-current');
+    var totalEl = document.getElementById('page-total');
+    var sectionEl = document.getElementById('page-section');
+    
+    var headings = document.querySelectorAll('h2');
+    var headingOffsets = [];
+    for (var i = 0; i < headings.length; i++) {
+        headingOffsets.push({ el: headings[i], offset: headings[i].offsetTop });
+    }
+
+    var bodyHeight = document.body.scrollHeight;
+    var viewportHeight = window.innerHeight;
+    var totalPages = Math.max(1, Math.ceil(bodyHeight / (viewportHeight * 0.85)));
+
+    function updatePage() {
+        var scrollY = window.scrollY || window.pageYOffset;
+        var docH = document.documentElement.scrollHeight;
+        var windowH = window.innerHeight;
+        var currentPage = Math.max(1, Math.round((scrollY / (docH - windowH)) * (totalPages - 1)) + 1);
+        currentEl.textContent = currentPage;
+        totalEl.textContent = totalPages;
+        var currentSection = 'CloudOptima';
+        for (var j = headingOffsets.length - 1; j >= 0; j--) {
+            if (scrollY + 100 >= headingOffsets[j].offset) {
+                currentSection = headingOffsets[j].el.textContent.trim();
+                break;
+            }
+        }
+        sectionEl.textContent = currentSection;
+        if (scrollY > 200) { indicator.classList.add('visible'); }
+        else { indicator.classList.remove('visible'); }
+    }
+    window.addEventListener('scroll', updatePage);
+    window.addEventListener('resize', updatePage);
+    updatePage();
+})();
+</script>
+
+</body>
+</html>
