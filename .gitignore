@@ -41,8 +41,11 @@ ARCHITECTURE.md
 .github/
 .agents/
 .claude/
-docs/
+docs/*.md
+docs/decisions/
 scripts/
+# Exception: allow the Experience Guide (for Microsoft collaboration)
+!docs/CLOUDOPTIMA_EXPERIENCE_GUIDE.html
 src/api/
 src/cli/
 src/core/compliance_rag.py
