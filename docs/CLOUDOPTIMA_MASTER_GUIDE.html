@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .toc ol li ol li a { color: #888; }
     @page { size: A4; margin: 0.75in; @bottom-center { content: "Page " counter(page); font-family: 'Inter', sans-serif; font-size: 8pt; color: #999; } }
     @page :first { @bottom-center { content: none; } }
-    @media print { body { background: white; color: #333; padding: 0; font-size: 10pt; } h1, h2, h3 { -webkit-text-fill-color: initial; background: none; color: #6C5CE7; } p, li, td { color: #444; } .code-block { background: #f5f5ff; border-color: #ddd; color: #333; } table th { background: #eee; color: #333; } a { color: #6C5CE7; } .page-indicator { display: none !important; } }
+    @media print { body { background: white; color: #333; padding: 0; font-size: 10pt; } h1, h2, h3 { -webkit-text-fill-color: initial; background: none; color: #6C5CE7; } p, li, td { color: #444; } .code-block { background: #f5f5ff; border-color: #ddd; color: #333; } table th { background: #eee; color: #333; } a { color: #6C5CE7; } .mermaid { background: white; border: 1px solid #ddd; } .page-indicator { display: none !important; } }
     .page-indicator { position: fixed; bottom: 20px; right: 20px; background: rgba(108,92,231,0.85); backdrop-filter: blur(12px); color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; font-weight: 500; z-index: 9999; box-shadow: 0 4px 20px rgba(0,0,0,0.4); opacity: 0; transition: opacity 0.3s ease; pointer-events: none; user-select: none; }
     .page-indicator.visible { opacity: 1; }
     .page-indicator .page-sep { color: rgba(255,255,255,0.4); margin: 0 4px; }
