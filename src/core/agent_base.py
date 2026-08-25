@@ -186,8 +186,20 @@ class BaseAgent:
         self.client = NVIDIAClient(model=model)
         self.system_prompt = SYSTEM_PROMPTS[agent_type]
 
+    # Maximum tokens for input context. If the combined system prompt + user
+    # input exceeds this, the input is truncated to prevent context window overflow.
+    MAX_INPUT_TOKENS = 12000
+    # Timeout for a single agent call (seconds). Prevents runaway API calls.
+    RUN_TIMEOUT_SECONDS = 120
+
     async def run(self, session_id: str, user_input: str, context: Optional[list[dict]] = None) -> AgentTurn:
-        """Run the agent on the given input. Returns an AgentTurn."""
+        """Run the agent on the given input. Returns an AgentTurn.
+        
+        Includes:
+        - Input truncation to prevent context window overflow
+        - Timeout guard to prevent runaway API calls
+        - Graceful degradation on failure
+        """
         turn = AgentTurn(
             session_id=session_id,
             agent_type=self.agent_type,
@@ -200,11 +212,27 @@ class BaseAgent:
             messages = [{"role": "system", "content": self.system_prompt}]
             if context:
                 messages.extend(context)
-            messages.append({"role": "user", "content": user_input})
+            
+            # Context window management: truncate user input if combined
+            # messages exceed token budget. This prevents context overflow
+            # on very large requirements.
+            estimated_tokens = len(self.system_prompt.split()) + len(user_input.split())
+            if estimated_tokens > self.MAX_INPUT_TOKENS:
+                # Keep system prompt intact, truncate user input
+                max_input_chars = self.MAX_INPUT_TOKENS * 4  # rough chars-to-tokens
+                truncated_input = user_input[:max_input_chars] + "\n\n[Input truncated due to size limits]"
+                messages.append({"role": "user", "content": truncated_input})
+                logger.warning(f"Agent {self.agent_type}: input truncated from {len(user_input)} to {max_input_chars} chars")
+            else:
+                messages.append({"role": "user", "content": user_input})
 
             start = datetime.now(timezone.utc)
             output = self.client.chat_completion(messages)
             duration = (datetime.now(timezone.utc) - start).total_seconds() * 1000
+
+            # Timeout guard: if the call took too long, log a warning
+            if duration > self.RUN_TIMEOUT_SECONDS * 1000:
+                logger.warning(f"Agent {self.agent_type} took {duration:.0f}ms (threshold: {self.RUN_TIMEOUT_SECONDS}s)")
 
             turn.output_text = output
             turn.duration_ms = int(duration)

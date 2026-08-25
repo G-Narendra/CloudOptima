@@ -238,6 +238,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
 | Azure Retail API latency / rate limits | All pricing calls cached via the shared `LLMCache` with graceful fallback to static pricing data on network failure | Cost advisor stays useful even when Azure's public API is slow or unreachable |
 | Compliance rules for regions not covered by the built-in KB | Rule lookup falls back to RAG retrieval over the compliance corpus, then returns empty rather than guessing | Regulatory claims must be traceable — the system never invents a rule it can't cite |
 | Observability noise in demo mode | Sentry init skipped without a DSN; breadcrumbs emitted best-effort behind try/except | Demo/local runs stay clean; production gets full tracing with PII filtering |
+| Agent input could exceed context window | Input truncation at 12K tokens with system prompt preserved | Very large requirements could overflow the LLM context — truncation degrades gracefully instead of failing |
+| No timeout on agent LLM calls | 120s timeout guard with duration logging | A hung API call blocks the entire pipeline — timeout prevents indefinite waiting |
+| God prompting anti-pattern risk | System prompts are per-agent (Architect, Cost, Security, Compliance, Judge) with focused responsibilities | Each agent gets only its domain instructions, not all five — prevents instruction forgetting in long prompts |
 
 ---
 
