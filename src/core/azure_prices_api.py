@@ -19,6 +19,7 @@ Features:
 from __future__ import annotations
 import json
 import logging
+import time
 from dataclasses import dataclass, field
 from typing import Optional
 import httpx
@@ -313,7 +314,6 @@ def verify_api_access() -> dict:
     Returns:
         dict with "status", "latency_ms", and "items_count" keys
     """
-    import time
     start = time.monotonic()
     try:
         resp = httpx.get(

@@ -229,6 +229,18 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
 - **Traceability**: Every decision logged with rationale — no black box
 - **Extensibility**: Add agents without changing core logic
 
+## Engineering Decisions & Challenges Solved
+
+| Challenge | Decision | Why |
+|---|---|---|
+| Import failures only surfaced at request time (deps imported inside methods) | Hard dependencies (`openai`, `httpx`, `tenacity`) hoisted to module level in `llm_client.py`; optional SDKs (`anthropic`, `google-generativeai`) guarded with `try/except ImportError` | A broken environment should fail at startup with a clear message, not as a runtime 500 on the 10th user action |
+| Retry decorator rebuilt on every LLM call | Shared `retry_on_transient` policy defined once at module scope | Consistent exponential backoff across all providers, zero per-call overhead |
+| Azure Retail API latency / rate limits | All pricing calls cached via the shared `LLMCache` with graceful fallback to static pricing data on network failure | Cost advisor stays useful even when Azure's public API is slow or unreachable |
+| Compliance rules for regions not covered by the built-in KB | Rule lookup falls back to RAG retrieval over the compliance corpus, then returns empty rather than guessing | Regulatory claims must be traceable — the system never invents a rule it can't cite |
+| Observability noise in demo mode | Sentry init skipped without a DSN; breadcrumbs emitted best-effort behind try/except | Demo/local runs stay clean; production gets full tracing with PII filtering |
+
+---
+
 ---
 
 ## Deployment

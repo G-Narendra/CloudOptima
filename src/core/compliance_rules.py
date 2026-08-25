@@ -5,7 +5,11 @@ canonical source of truth for the Compliance Agent's regulatory claims.
 """
 
 from __future__ import annotations
+import logging
+
 from src.core.models import ComplianceRule
+
+logger = logging.getLogger(__name__)
 
 # In-memory compliance rules database
 # In production, this would be loaded from a database or versioned file
@@ -197,8 +201,7 @@ def get_rules_for_region(region: str) -> list[ComplianceRule]:
         if rag_rules:
             return rag_rules
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).warning(f"RAG fallback failed for '{region}': {e}")
+        logger.warning(f"RAG fallback failed for '{region}': {e}")
 
     return []
 

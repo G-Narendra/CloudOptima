@@ -2,6 +2,14 @@
 
 Supports: NVIDIA NIMs, OpenAI, Anthropic Claude, Google Gemini, DeepSeek.
 All providers follow a unified interface. Provider switching via config/env.
+
+Import policy:
+- Hard dependencies (openai, httpx, tenacity) are imported at module level
+  so a broken environment fails fast at startup.
+- Optional provider SDKs (anthropic, google-generativeai) are guarded with
+  try/except ImportError so an unused provider never breaks startup.
+- `src.core.nvidia_client` is imported lazily inside _mock_response only,
+  because that module imports this one (circular dependency).
 """
 
 from __future__ import annotations
@@ -13,9 +21,27 @@ from dataclasses import dataclass, field
 from typing import Optional
 from enum import Enum
 
+import httpx
+from openai import OpenAI
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
+
 from src.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Shared retry policy for transient network failures (timeouts, dropped
+# connections). Defined once at module level so every provider client uses
+# consistent backoff behavior without rebuilding decorators per call.
+retry_on_transient = retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    retry=retry_if_exception_type((httpx.TimeoutException, httpx.RemoteProtocolError)),
+)
 
 
 class LLMProvider(str, Enum):
@@ -101,8 +127,6 @@ class NvidiaClient(LLMClient):
     """NVIDIA NIMs via OpenAI-compatible endpoint."""
 
     def _setup_client(self):
-        from openai import OpenAI
-        import httpx
         if self.config.api_key:
             self._client = OpenAI(
                 base_url=self.config.base_url,
@@ -113,17 +137,10 @@ class NvidiaClient(LLMClient):
             self._client = None
 
     def chat_completion(self, messages: list[dict], **kwargs) -> str:
-        from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-        import httpx
-
         if settings.demo_mode or not self._client:
             return self._mock_response(messages)
 
-        @retry(
-            stop=stop_after_attempt(3),
-            wait=wait_exponential(multiplier=1, min=2, max=10),
-            retry=retry_if_exception_type((httpx.TimeoutException, httpx.RemoteProtocolError)),
-        )
+        @retry_on_transient
         def _call():
             response = self._client.chat.completions.create(
                 model=self.config.model,
@@ -149,8 +166,6 @@ class OpenAIClient(LLMClient):
     """OpenAI API client."""
 
     def _setup_client(self):
-        from openai import OpenAI
-        import httpx
         if self.config.api_key:
             self._client = OpenAI(
                 api_key=self.config.api_key,
@@ -277,8 +292,6 @@ class DeepSeekClient(LLMClient):
     """DeepSeek API (OpenAI-compatible)."""
 
     def _setup_client(self):
-        from openai import OpenAI
-        import httpx
         if self.config.api_key:
             self._client = OpenAI(
                 base_url=self.config.base_url,
@@ -301,6 +314,8 @@ class DeepSeekClient(LLMClient):
         return response.choices[0].message.content or ""
 
     def _mock_response(self, messages: list[dict]) -> str:
+        # Imported lazily to avoid a circular import (nvidia_client imports
+        # this module's LLMConfig for its own configuration).
         from src.core.nvidia_client import NVIDIAClient
         return NVIDIAClient()._mock_response(messages)
 
