@@ -12,6 +12,10 @@
 
 **CloudOptima** is a multi-agent AI system that simulates a panel of cloud experts to optimize your Azure infrastructure. Describe your needs in plain English, and five specialized AI agents will analyze, debate, and deliver a complete cloud architecture with cost estimates, security audits, and compliance reviews.
 
+Cloud architecture decisions involve trade-offs that no single perspective can capture: the cheapest option may fail security requirements, the most secure option may blow the budget, and the architect's recommendation may conflict with compliance mandates. Existing cloud advisors (Azure Advisor, AWS Well-Architected Tool) provide rule-based recommendations but cannot reason about novel architectures or resolve conflicts between competing priorities. I chose a multi-agent debate architecture over a single-agent approach after discovering that separate specialist prompts produce more focused, domain-specific outputs than one monolithic prompt trying to handle all concerns simultaneously — this mirrors how real cloud architecture review boards operate, where each specialist challenges the others' assumptions.
+
+The Judge agent resolves conflicts between specialists by weighing each position against the original requirements, producing a final verdict with traceable reasoning. Live Azure pricing data is fetched from the Azure Retail Prices API and cached to avoid redundant calls, while compliance rules are retrieved via RAG from a regulatory knowledge base covering GDPR, HIPAA, DPDP, and UAE PDPL.
+
 1. **Architect** — Design compute, storage, networking, and data tiers
 2. **Cost Analyst** — Estimate pricing and find savings opportunities (live Azure prices)
 3. **Security Engineer** — Identify vulnerabilities and risks
